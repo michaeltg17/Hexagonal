@@ -14,7 +14,7 @@
 - [Presenter](#presenter)
 - [Unit of Work](#unit-of-work)
 - [First-Class Collections](#first-class-collections)
-- [Factory](@factory)
+- [Factory](#factory)
 ### [DDD Patterns](#ddd-patterns)
 - [Value Object](#value-object)
 - [Entity](#entity)
@@ -39,7 +39,7 @@
 ## Introduction
 Sample implementation of the Clean Architecture Principles with .NET Core. Use cases as central organizing structure, decoupled from frameworks and technology details. Built with small components that are developed and tested in isolation.
 
-This template is a Virtual Wallet applicationn which a customer can register an account then manage the balance with Deposits, Withdraws and Transfers.
+This template is a Renting Company microservice: a fleet manager registers new vehicles in the fleet, a customer lists the available vehicles, rents one of them and later returns it. The fleet can not contain vehicles older than 5 years and a person can not have more than 1 active rental at the same time.
 
 ## Clean Architecture
 The Clean Architecture style focus on a loosely coupled implementation of use cases and it is summarized as:
@@ -48,15 +48,11 @@ The Clean Architecture style focus on a loosely coupled implementation of use ca
 - The implementation is guided by tests (TDD Outside-In).
 - Decoupled from technology details.
 
-![clean-architecture.jpg](/.attachments/clean-architecture.jpg)
-
 ## Hexagonal Architecture Style
 Hexagonal Architecture (aka Ports and Adapters) is one strategy to decouple the use cases from the external details. 
 It is an architectural style that allows an application to equally be driven by users, programs, automated test or batch scripts, and to be developed and tested in isolation from its eventual run-time devices and databases. It has another beneficial effect: it allows to isolate the core business of an application and automatically test its behaviour independently of everything else.
 
 This architectural style uses a notion of port and adapter. Thus, it is also referred to as **Ports and Adapters**. Port is an abstract concept, whereas the adapter is the concrete implementation of a port.
-
-![hexagonal-architecture.png](/.attachments/hexagonal-architecture.png)
 
 The hexagon is the application itself. Saying “hexagon” and saying “application” is the same thing. Inside the hexagon we just have the things that are important for the business problem that the application is trying to solve. The hexagon contains the business logic, with no references to any technology, framework or real world device. So the application is technology agnostic.
 
@@ -74,8 +70,6 @@ Ports are the application boundary, in the picture a port is an edge of the hexa
 ### Adapters
 Actors interact with hexagon ports through adapters using a specific technology. An adapter is a software component that allows a technology to interact with a port of the hexagon. Given a port, there may be an adapter for each desired technology that we want to use. Adapters are outside the application. A driver adapter uses a driver port interface, converting a specific technology request into a technology agnostic request to a driver port.
 
-![hexagonal-architecture2.png](/.attachments/hexagonal-architecture2.png)
-
 ## Use Cases
 Use Cases are algorithms that interpret the input to generate the output data, their implementation should be closer as possible to the business vocabulary.
 
@@ -84,23 +78,23 @@ When talking about a use case, it does not matter if it a Mobile or a Desktop ap
 - Primary actors initiate a use case. They can be the End User, another system or a clock.
 - Secondary actors are affected by use cases.
 
-On this template the Customer can Register an account then manage the balance by Deposits, Withdrawls and Transfers. A set of use cases is used to describe software. Following the Customer primary actor on the left side, in the middle the Virtual Wallet system and the secondary actors on the right side
+On this template the Customer is the primary actor on the left who rents and returns vehicles, and the Fleet Manager creates the new vehicles of the fleet. In the middle the Renting microservice and the secondary actors (e.g. the MongoDB database) on the right. A set of use cases is used to describe the software: create a vehicle, list available vehicles, rent a vehicle and return a vehicle.
 
 ## Design Patterns
 The following design patterns will help us continue to implement use cases consistently. 
 
 ### Controller and Command Pattern
-In a Command-based architecture, Controllers receive Requests and send commands to perform some operationnd we a have separate handler of command that makes the separation of concern and improves the single responsibility as well. 
+In a Command-based architecture, Controllers receive Requests and send commands to perform some operation and we have a separate handler of command that makes the separation of concern and improves the single responsibility as well. 
 
 To implement this architecture, we can use a third-party library, like **MediatR** (Mediator Pattern) which does a lot of groundwork for us. The mediator pattern defines an object that encapsulates how a set of objects interact.
 
 ```
-    public sealed class CustomersController : ControllerBase
+    public sealed class VehiclesController : ControllerBase
     {
 
         // code omitted to simplify
 
-        public async Task<IActionResult> Post([FromBody][Required] RegisterRequest request)
+        public async Task<IActionResult> Post([FromBody][Required] CreateVehicleRequest request)
         {
             _appLogger.LogDebug(
                 "Entering Post. Request: {@request}",
@@ -122,13 +116,14 @@ MediatR allows us to decouple our controllers from our business logic by having 
 
 The request/response interface handles both command and query scenarios. First, create a message:
 ```
-    public class RegisterRequest : IRequest<IWebApiPresenter>
+    public class CreateVehicleRequest : IRequest<IWebApiPresenter>
     {
-        public RegisterRequest(string ssn, string name, decimal initialAmount)
+        public CreateVehicleRequest(string plate, string make, string model, DateTime manufactureDate)
         {
-            SSN = ssn;
-            Name = name;
-            InitialAmount = initialAmount;
+            Plate = plate;
+            Make = make;
+            Model = model;
+            ManufactureDate = manufactureDate;
         }
 
         // code omitted to simplify
@@ -137,16 +132,21 @@ The request/response interface handles both command and query scenarios. First, 
 
 Next, the handler. Build the Input message then call the Use Case, you should notice that the handler do not build the Response, instead this responsibility is delegated to the presenter object.:
 ```
-    public class RegisterRequestHandler : IRequestHandler<RegisterRequest, IWebApiPresenter>
+    public class CreateVehicleRequestHandler : IRequestHandler<CreateVehicleRequest, IWebApiPresenter>
     {
-        private readonly IRegisterUseCase _useCase;
-        private readonly RegisterPresenter _presenter;
+        private readonly ICreateVehicleUseCase _useCase;
+        private readonly CreateVehiclePresenter _presenter;
 
         // code omitted to simplify
 
-        public async Task<IWebApiPresenter> Handle(RegisterRequest request, CancellationToken cancellationToken)
+        public async Task<IWebApiPresenter> Handle(CreateVehicleRequest request, CancellationToken cancellationToken)
         {
-            var input = new RegisterInput(new SSN(request.SSN), new Name(request.Name), new PositiveMoney(request.InitialAmount));
+            var input = new CreateVehicleInput(
+                new Plate(request.Plate),
+                new Make(request.Make),
+                new Model(request.Model),
+                new ManufactureDate(request.ManufactureDate));
+
             await _useCase.Execute(input);
             return _presenter;
         }
@@ -157,77 +157,90 @@ Next, the handler. Build the Input message then call the Use Case, you should no
 ViewModels are data transfer objects, they will be rendered by the framework so we need to follow the framework guidelines. You have to add comments describing each property and the [Required] attribute so swagger generators could know the properties that are not nullable.
 
 ```
-    public sealed class RegisterResponse
+    public sealed class VehicleResponse
     {
-        public RegisterResponse(CustomerId customerId, SSN ssn, Name name, List<AccountDetailsModel> accounts)
+        public VehicleResponse(
+            Guid vehicleId,
+            Plate plate,
+            Make make,
+            Model model,
+            ManufactureDate manufactureDate,
+            bool isAvailable)
         {
-            CustomerId = customerId.ToGuid();
-            SSN = ssn.ToString();
-            Name = name.ToString();
-            Accounts = accounts;
+            VehicleId = vehicleId;
+            Plate = plate.ToString();
+            Make = make.ToString();
+            Model = model.ToString();
+            ManufactureDate = manufactureDate.ToString();
+            IsAvailable = isAvailable;
         }
 
         /// <summary>
-        /// Gets customer ID.
+        /// Gets vehicle ID.
         /// </summary>
         [Required]
-        public Guid CustomerId { get; }
+        public Guid VehicleId { get; }
 
         /// <summary>
-        /// Gets sSN.
+        /// Gets plate.
         /// </summary>
         [Required]
-        public string SSN { get; }
+        public string Plate { get; }
 
         /// <summary>
-        /// Gets name.
+        /// Gets make.
         /// </summary>
         [Required]
-        public string Name { get; }
+        public string Make { get; }
 
         /// <summary>
-        /// Gets accounts.
+        /// Gets model.
         /// </summary>
         [Required]
-        public List<AccountDetailsModel> Accounts { get; }
+        public string Model { get; }
+
+        /// <summary>
+        /// Gets manufacture date.
+        /// </summary>
+        [Required]
+        public string ManufactureDate { get; }
+
+        /// <summary>
+        /// Gets whether the vehicle is available.
+        /// </summary>
+        [Required]
+        public bool IsAvailable { get; }
     }
 ```
 ### Presenter
-Presenters are called by te application Use Cases and build the Response objects.
+Presenters are called by the application Use Cases and build the Response objects.
 ```
-    public sealed class RegisterPresenter : IWebApiPresenter, IRegisterOutputPort
+    public sealed class CreateVehiclePresenter : IWebApiPresenter, ICreateVehicleOutputPort
     {
         public IActionResult ActionResult { get; private set; }
 
-        public void CustomerAlreadyRegistered(string message)
+        public void VehicleAlreadyExists(string message)
         {
             ActionResult = new BadRequestObjectResult(message);
         }
 
-        public void StandardHandle(RegisterOutput output)
+        public void StandardHandle(CreateVehicleOutput output)
         {
-            var transactions = new List<TransactionModel>();
-
-            foreach (var item in output.Account.Transactions)
-            {
-                var transaction = new TransactionModel(item.Amount, item.Description, item.TransactionDate);
-                transactions.Add(transaction);
-            }
-
-            var account = new AccountDetailsModel(output.Account.AccountId, output.Account.CurrentBalance, transactions);
-
-            var accounts = new List<AccountDetailsModel>();
-            accounts.Add(account);
-
-            var registerResponse = new RegisterResponse(output.Customer.CustomerId, output.Customer.SSN, output.Customer.Name, accounts);
+            var vehicle = new VehicleResponse(
+                output.Vehicle.Id.ToGuid(),
+                output.Vehicle.Plate,
+                output.Vehicle.Make,
+                output.Vehicle.Model,
+                output.Vehicle.ManufactureDate,
+                output.Vehicle.IsAvailable);
 
             ActionResult = new CreatedAtRouteResult(
-                "GetCustomer",
+                "GetVehicle",
                 new
                 {
-                    CustomerId = registerResponse.CustomerId,
+                    VehicleId = vehicle.VehicleId,
                 },
-                registerResponse);
+                vehicle);
         }
     }
 ```
@@ -239,11 +252,11 @@ The output port for the use case regular behavior.
 
 **Error Output**
 
-Called when an blocking errors happens.
+Called when a blocking error happens.
 
 **Alternative Output**
 
-Called when an blocking errors happens.
+Called when an alternative flow happens.
 
 ### Unit Of Work
 Unit of work is the pattern that allows handling transactions during data manipulation using the repository pattern. It maintains a list of the objects affected by a business transaction and coordinates the writing of the changes and the resolution of concurrency problems.
@@ -253,25 +266,26 @@ A basic example of the implementation of the unit of work pattern can be seen in
 ```
     public interface IUnitOfWork
     {
-        Task<int> Save();
+        Task Save();
     }
 ```
 
 ```
     public sealed class UnitOfWork : IUnitOfWork, IDisposable
     {
-        private readonly ExampleContext _context;
+        private readonly IMongoClient _client;
+        private IClientSessionHandle? _session;
         private bool _disposed = false;
 
-        public UnitOfWork(ExampleContext context)
+        public UnitOfWork(IMongoClient client)
         {
-            _context = context;
+            _client = client ??
+                throw new ArgumentNullException(nameof(client));
         }
 
-        public async Task<int> Save()
+        public async Task Save()
         {
-            int affectedRows = await _context.SaveChangesAsync();
-            return affectedRows;
+            await (_session ??= _client.StartSession()).CommitTransactionAsync();
         }
 
         public void Dispose()
@@ -286,7 +300,8 @@ A basic example of the implementation of the unit of work pattern can be seen in
             {
                 if (disposing)
                 {
-                    _context.Dispose();
+                    _session?.Dispose();
+                    _client.Dispose();
                 }
             }
 
@@ -299,42 +314,30 @@ A basic example of the implementation of the unit of work pattern can be seen in
 Application of this rule is simple: any class that contains a collection should contain no other member variables. Each collection gets wrapped in its own class, so now behaviors related to the collection have a home. You may find that filters become a part of this new class. Also, your new class can handle activities like joining two groups together or applying a rule to each element of the group.
 
 ```
-    public sealed class CreditsCollection
+    public sealed class RentalCollection
     {
-        private readonly IList<ICredit> _credits;
+        private readonly IList<IRental> _rentals;
 
-        public CreditsCollection()
+        public RentalCollection()
         {
-            this._credits = new List<ICredit>();
+            this._rentals = new List<IRental>();
         }
 
-        public void Add<T>(IEnumerable<T> credits)
-            where T : ICredit
+        public void Add(IRental rental) => this._rentals.Add(rental);
+
+        public IReadOnlyCollection<IRental> GetRentals()
         {
-            foreach (var credit in credits)
-            {
-                this.Add(credit);
-            }
+            return new ReadOnlyCollection<IRental>(this._rentals);
         }
 
-        public void Add(ICredit credit) => this._credits.Add(credit);
-
-        public IReadOnlyCollection<ICredit> GetTransactions()
+        public IRental? GetActive()
         {
-            var transactions = new ReadOnlyCollection<ICredit>(this._credits);
-            return transactions;
+            return this._rentals.FirstOrDefault(r => r.IsActive);
         }
 
-        public PositiveMoney GetTotal()
+        public bool HasActiveRental()
         {
-            PositiveMoney total = new PositiveMoney(0);
-
-            foreach (ICredit credit in this._credits)
-            {
-                total = credit.Sum(total);
-            }
-
-            return total;
+            return this.GetActive() is not null;
         }
     }
 ```
@@ -343,39 +346,29 @@ Application of this rule is simple: any class that contains a collection should 
 In Factory pattern, we create object without exposing the creation logic to the client and refer to newly created object using a common interface.
 
 ```
-    public interface IAccountFactory
+    public interface IVehicleFactory
     {
-        IAccount NewAccount(CustomerId customerId);
-
-        ICredit NewCredit(IAccount account, PositiveMoney amountToDeposit, DateTime transactionDate);
-
-        IDebit NewDebit(IAccount account, PositiveMoney amountToWithdraw, DateTime transactionDate);
+        IVehicle NewVehicle(Plate plate, Make make, Model model, ManufactureDate manufactureDate);
     }
 ```
 ```
-    public interface ICustomerFactory
+    public interface IRentalFactory
     {
-        ICustomer NewCustomer(SSN ssn, Name name);
+        IRental NewRental(VehicleId vehicleId, Person person);
     }
 ```    
 ```
-    public sealed class EntityFactory : ICustomerFactory, IAccountFactory
+    public sealed class EntityFactory : IVehicleFactory, IRentalFactory
     {
-        public IAccount NewAccount(CustomerId customerId) => new AccountEntity(customerId);
+        public IVehicle NewVehicle(
+            Plate plate,
+            Make make,
+            Model model,
+            ManufactureDate manufactureDate) => new VehicleEntity(plate, make, model, manufactureDate);
 
-        public ICredit NewCredit(
-            IAccount account,
-            PositiveMoney amountToDeposit,
-            DateTime transactionDate) => new CreditEntity(account, amountToDeposit, transactionDate);
-
-        public ICustomer NewCustomer(
-            SSN ssn,
-            Name name) => new CustomerEntity(ssn, name);
-
-        public IDebit NewDebit(
-            IAccount account,
-            PositiveMoney amountToWithdraw,
-            DateTime transactionDate) => new DebitEntity(account, amountToWithdraw, transactionDate);
+        public IRental NewRental(
+            VehicleId vehicleId,
+            Person person) => new RentalEntity(vehicleId, person);
     }
 ```
 
@@ -388,23 +381,30 @@ Encapsulate the tiny domain business rules. Structures that are unique by their 
 As seen in the example, the VOs are where we have the field validations.
 
 ```
-    public readonly struct Name
+    public readonly struct ManufactureDate
     {
-        private readonly string _text;
+        private readonly DateTime _value;
 
-        public Name(string text)
+        public ManufactureDate(DateTime value)
         {
-            if (string.IsNullOrWhiteSpace(text))
+            if (value > DateTime.UtcNow)
             {
-                throw new NameShouldNotBeEmptyException($"The {nameof(text)} field is required.");
+                throw new ManufactureDateShouldBeInThePastException(
+                    "The manufacture date can not be in the future.");
             }
 
-            this._text = text;
+            if (value.AddYears(5) < DateTime.UtcNow)
+            {
+                throw new VehicleShouldNotBeOlderThanFiveYearsException(
+                    "The vehicle is older than the maximum allowed age of 5 years.");
+            }
+
+            this._value = value;
         }
 
         public override string ToString()
         {
-            return this._text;
+            return this._value.ToString("O");
         }
     }
 ```
@@ -418,25 +418,33 @@ Rules of thumb:
 Highly abstract and mutable objects unique identified by its IDs
 
 ```
-    public abstract class Customer : ICustomer
+    public abstract class Rental : IRental
     {
-        public Customer()
+        public RentalId Id { get; protected set; }
+
+        public VehicleId VehicleId { get; protected set; }
+
+        public Person Person { get; protected set; }
+
+        public DateTime? RentDate { get; protected set; }
+
+        public DateTime? ReturnDate { get; protected set; }
+
+        public bool IsActive => this.ReturnDate is null;
+
+        public void Rent(DateTime rentDate)
         {
-            this.Accounts = new AccountCollection();
+            this.RentDate = rentDate;
         }
 
-        public CustomerId Id { get; protected set; }
-
-        public Name Name { get; protected set; }
-
-        public SSN SSN { get; protected set; }
-
-        public AccountCollection Accounts { get; protected set; }
-
-        public void Register(AccountId accountId)
+        public void Return(DateTime returnDate)
         {
-            this.Accounts ??= new AccountCollection();
-            this.Accounts.Add(accountId);
+            if (this.ReturnDate is not null)
+            {
+                throw new RentalAlreadyReturnedException("The rental has already been returned.");
+            }
+
+            this.ReturnDate = returnDate;
         }
     }
 ```
@@ -456,56 +464,47 @@ Similar to Entities with the addition that Aggregate Root are responsible to kee
 - Define the transaction scope.
 
 ```
-    public abstract class Account : IAccount
+    public abstract class Vehicle : IVehicle
     {
-        protected Account()
+        protected Vehicle()
         {
-            this.Credits = new CreditsCollection();
-            this.Debits = new DebitsCollection();
+            this.Rentals = new RentalCollection();
         }
 
-        public AccountId Id { get; protected set; }
+        public VehicleId Id { get; protected set; }
 
-        public CreditsCollection Credits { get; protected set; }
+        public Plate Plate { get; protected set; }
 
-        public DebitsCollection Debits { get; protected set; }
+        public Make Make { get; protected set; }
 
-        public ICredit Deposit(IAccountFactory entityFactory, PositiveMoney amountToDeposit)
+        public Model Model { get; protected set; }
+
+        public ManufactureDate ManufactureDate { get; protected set; }
+
+        public RentalCollection Rentals { get; protected set; }
+
+        public bool IsAvailable => this.Rentals.GetActive() is null;
+
+        public IRental Rent(IRentalFactory rentalFactory, Person person, DateTime rentDate)
         {
-            var credit = entityFactory.NewCredit(this, amountToDeposit, DateTime.UtcNow);
-            this.Credits.Add(credit);
-            return credit;
-        }
-
-        public IDebit Withdraw(IAccountFactory entityFactory, PositiveMoney amountToWithdraw)
-        {
-            if (this.GetCurrentBalance().LessThan(amountToWithdraw))
+            if (!this.IsAvailable)
             {
-                throw new MoneyShouldBePositiveException("Account has not enough funds.");
+                throw new VehicleAlreadyRentedException("The vehicle is already rented.");
             }
 
-            var debit = entityFactory.NewDebit(this, amountToWithdraw, DateTime.UtcNow);
-            this.Debits.Add(debit);
-            return debit;
+            var rental = rentalFactory.NewRental(this.Id, person);
+            rental.Rent(rentDate);
+            this.Rentals.Add(rental);
+
+            return rental;
         }
 
-        public bool IsClosingAllowed()
+        public void Return(DateTime returnDate)
         {
-            return this.GetCurrentBalance().IsZero();
-        }
+            var active = this.Rentals.GetActive()
+                ?? throw new VehicleNotRentedException("The vehicle is not rented.");
 
-        public Money GetCurrentBalance()
-        {
-            var totalCredits = this.Credits
-                .GetTotal();
-
-            var totalDebits = this.Debits
-                .GetTotal();
-
-            var totalAmount = totalCredits
-                .Subtract(totalDebits);
-
-            return totalAmount;
+            active.Return(returnDate);
         }
     }
 ```
@@ -521,47 +520,38 @@ Rules of thumb:
 Provides persistence capabilities to Aggregate Roots or Entities.
 
 ```
-    public sealed class CustomerRepository : ICustomerRepository
+    public sealed class VehicleRepository : IVehicleRepository
     {
-        private readonly ExampleContext _context;
+        private readonly IMongoCollection<VehicleEntity> _vehicles;
 
-        public CustomerRepository(ExampleContext context)
+        public VehicleRepository(IMongoDatabase database)
         {
-            _context = context ??
-                throw new ArgumentNullException(nameof(context));
+            _vehicles = database.GetCollection<VehicleEntity>("vehicles");
         }
 
-        public async Task Add(ICustomer customer)
+        public async Task Add(IVehicle vehicle)
         {
-            await _context.Customers.AddAsync((CustomerEntity)customer);
-            await _context.SaveChangesAsync();
+            await _vehicles.InsertOneAsync((VehicleEntity)vehicle);
         }
 
-        public async Task<ICustomer> GetBy(CustomerId customerId)
+        public async Task<IVehicle> GetBy(VehicleId vehicleId)
         {
-            var customer = await _context.Customers
-                .Where(c => c.Id.Equals(customerId))
-                .SingleOrDefaultAsync();
+            var vehicle = await _vehicles
+                .Find(v => v.Id.Equals(vehicleId))
+                .FirstOrDefaultAsync();
 
-            if (customer is null)
+            if (vehicle is null)
             {
-                throw new CustomerNotFoundException($"The customer {customerId} does not exist or is not processed yet.");
+                throw new VehicleNotFoundException($"The vehicle {vehicleId} does not exist or is not processed yet.");
             }
 
-            var accounts = _context.Accounts
-                .Where(e => e.CustomerId.Equals(customer.Id))
-                .Select(e => e.Id)
-                .ToList();
-
-            customer.LoadAccounts(accounts);
-
-            return customer;
+            return vehicle;
         }
 
-        public async Task Update(ICustomer customer)
+        public async Task Update(IVehicle vehicle)
         {
-            _context.Customers.Update((CustomerEntity)customer);
-            await _context.SaveChangesAsync();
+            await _vehicles
+                .ReplaceOneAsync(v => v.Id.Equals(vehicle.Id), (VehicleEntity)vehicle);
         }
     }
 ```    
@@ -576,53 +566,56 @@ It is the application entry point for an user interaction. It accepts an input m
 They are also called **Application Service** in DDD architectures.
 
 ```
-    public sealed class WithdrawUseCase : IWithdrawUseCase
+    public sealed class RentVehicleUseCase : IRentVehicleUseCase
     {
-        private readonly AccountService _accountService;
-        private readonly IWithdrawOutputPort _outputPort;
-        private readonly IAccountRepository _accountRepository;
+        private readonly VehicleService _vehicleService;
+        private readonly IRentVehicleOutputPort _outputPort;
+        private readonly IVehicleRepository _vehicleRepository;
         private readonly IUnitOfWork _unitOfWork;
 
-        public WithdrawUseCase(
-            AccountService accountService,
-            IWithdrawOutputPort outputPort,
-            IAccountRepository accountRepository,
+        public RentVehicleUseCase(
+            VehicleService vehicleService,
+            IRentVehicleOutputPort outputPort,
+            IVehicleRepository vehicleRepository,
             IUnitOfWork unitOfWork)
         {
-            this._accountService = accountService;
+            this._vehicleService = vehicleService;
             this._outputPort = outputPort;
-            this._accountRepository = accountRepository;
+            this._vehicleRepository = vehicleRepository;
             this._unitOfWork = unitOfWork;
         }
 
-        public async Task Execute(WithdrawInput input)
+        public async Task Execute(RentVehicleInput input)
         {
             try
             {
-                var account = await this._accountRepository.Get(input.AccountId);
-                var debit = await this._accountService.Withdraw(account, input.Amount);
+                var vehicle = await this._vehicleRepository.Get(input.VehicleId);
+                var rental = await this._vehicleService.Rent(vehicle, input.Person);
 
                 await this._unitOfWork.Save();
 
-                this.BuildOutput(debit, account);
+                this.BuildOutput(rental, vehicle);
             }
-            catch (AccountNotFoundException notFoundEx)
+            catch (VehicleNotFoundException notFoundEx)
             {
                 this._outputPort.NotFoundHandle(notFoundEx.Message);
                 return;
             }
-            catch (MoneyShouldBePositiveException outOfBalanceEx)
+            catch (VehicleAlreadyRentedException alreadyRentedEx)
             {
-                this._outputPort.OutOfBalanceHandle(outOfBalanceEx.Message);
+                this._outputPort.AlreadyRentedHandle(alreadyRentedEx.Message);
+                return;
+            }
+            catch (PersonAlreadyHasActiveRentalException activeRentalEx)
+            {
+                this._outputPort.AlreadyHasRentalHandle(activeRentalEx.Message);
                 return;
             }
         }
 
-        private void BuildOutput(IDebit debit, IAccount account)
+        private void BuildOutput(IRental rental, IVehicle vehicle)
         {
-            var output = new WithdrawOutput(
-                debit,
-                account.GetCurrentBalance());
+            var output = new RentVehicleOutput(rental, vehicle);
 
             this._outputPort.StandardHandle(output);
         }
@@ -635,54 +628,63 @@ Rules of thumb:
 - Ideally a class has a single use case.
 - Invokes transaction operations (eg. Unit Of Work).
 
-### Bounnded Context
-It is a logical boundary, similar to a module in a system. In the Manga project the single Domain project is the single bounded context we designed.
+### Bounded Context
+It is a logical boundary, similar to a module in a system. In this project the single Domain project is the single bounded context we designed.
 
-As a rule out, in most cases a microservice will have only a bounded context.
+As a rule of thumb, in most cases a microservice will have only a bounded context.
 
 ### Entity Factory
 Creates new instances of Entities and Aggregate Roots. Should be implemented by the Infrastructure layer. See [Factory](#factory)
 
 ### Domain Service
-Useful functions cross Entities.
+Useful functions across Entities.
 
 ```
-    public class AccountService
+    public class VehicleService
     {
-        private readonly IAccountFactory _accountFactory;
-        private readonly IAccountRepository _accountRepository;
+        private readonly IVehicleFactory _vehicleFactory;
+        private readonly IRentalFactory _rentalFactory;
+        private readonly IVehicleRepository _vehicleRepository;
 
-        public AccountService(
-            IAccountFactory accountFactory,
-            IAccountRepository accountRepository)
+        public VehicleService(
+            IVehicleFactory vehicleFactory,
+            IRentalFactory rentalFactory,
+            IVehicleRepository vehicleRepository)
         {
-            this._accountFactory = accountFactory;
-            this._accountRepository = accountRepository;
+            this._vehicleFactory = vehicleFactory;
+            this._rentalFactory = rentalFactory;
+            this._vehicleRepository = vehicleRepository;
         }
 
-        public async Task<IAccount> OpenCheckingAccount(CustomerId customerId, PositiveMoney amount)
+        public async Task<IVehicle> Create(
+            Plate plate,
+            Make make,
+            Model model,
+            ManufactureDate manufactureDate)
         {
-            var account = this._accountFactory.NewAccount(customerId);
-            var credit = account.Deposit(this._accountFactory, amount);
-            await this._accountRepository.Add(account, credit);
+            var vehicle = this._vehicleFactory.NewVehicle(plate, make, model, manufactureDate);
+            await this._vehicleRepository.Add(vehicle);
 
-            return account;
+            return vehicle;
         }
 
-        public async Task<IDebit> Withdraw(IAccount account, PositiveMoney amount)
+        public async Task<IRental> Rent(IVehicle vehicle, Person person)
         {
-            var debit = account.Withdraw(this._accountFactory, amount);
-            await this._accountRepository.Update(account, debit);
+            if (await this._vehicleRepository.PersonHasActiveRental(person))
+            {
+                throw new PersonAlreadyHasActiveRentalException("The person already has an active rental.");
+            }
 
-            return debit;
+            var rental = vehicle.Rent(this._rentalFactory, person, DateTime.UtcNow);
+            await this._vehicleRepository.Update(vehicle);
+
+            return rental;
         }
 
-        public async Task<ICredit> Deposit(IAccount account, PositiveMoney amount)
+        public async Task Return(IVehicle vehicle)
         {
-            var credit = account.Deposit(this._accountFactory, amount);
-            await this._accountRepository.Update(account, credit);
-
-            return credit;
+            vehicle.Return(DateTime.UtcNow);
+            await this._vehicleRepository.Update(vehicle);
         }
     }
 ```
@@ -691,7 +693,7 @@ Rules of thumb:
 
 - It should not call transaction methods, should not call a Unit Of Work method.
 
-## Separation of concerns
+## Separation of Concerns
 Applications can be logically built to follow this principle by separating core business behavior from infrastructure and user interface logic. Ideally, business rules and logic should reside in a separate project, which should not depend on other projects in the application. This helps ensure that the business model is easy to test and can evolve without being tightly coupled to low-level implementation details. Separation of concerns is a key consideration behind the use of layers in application architectures.
 
 ### Domain
@@ -703,6 +705,5 @@ A project that contains the Application **Use Cases** which orchestrate the high
 ### Infrastructure
 The infrastructure layer is responsible to implement the **Adapters** to the **Secondary Actors**(Right Side). For instance an SQL Server Database is a secondary actor which is affected by the application use cases, all the implementation and dependencies required to consume the SQL Server is created on infrastructure. By design the infrastructure depends on application layer.
 
-### User Interface
+### User interface
 Responsible for rendering the Graphical User Interface (GUI) to interact with the User or other systems. Made of **Controllers** which receive HTTP Requests and **Presenters** which converts the application outputs into **ViewModels** that are rendered as HTTP Responses. 
-
