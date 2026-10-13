@@ -343,5 +343,6 @@ ASALocalRun/
 backend*.cfg
 azure-env*.ps1
 azure_env*.ps1
+.env
 
 .DS_Store
