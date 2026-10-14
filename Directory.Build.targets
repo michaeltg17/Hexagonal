@@ -1,4 +1,4 @@
-<Project>
+﻿<Project>
     <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>
     </PropertyGroup>
@@ -102,6 +102,8 @@
         <PackageReference Update="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="6.0.0" />
         <PackageReference Update="Respawn" Version="6.2.1" />
         <PackageReference Update="Moq" Version="4.20.72" />
+        <PackageReference Update="Testcontainers" Version="4.16.0" />
+        <PackageReference Update="Testcontainers.MongoDb" Version="4.16.0" />
 
         <!-- DbUp -->
         <PackageReference Update="dbup-sqlserver" Version="4.5.0" />
