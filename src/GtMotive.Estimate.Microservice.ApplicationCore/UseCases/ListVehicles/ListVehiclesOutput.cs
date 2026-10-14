@@ -1,17 +1,17 @@
 ﻿using System.Collections.Generic;
 
-namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.ListAvailableVehicles
+namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.ListVehicles
 {
     /// <summary>
-    /// Output message of the list available vehicles use case.
+    /// Output message of the list vehicles use case.
     /// </summary>
-    public sealed class ListAvailableVehiclesOutput : IUseCaseOutput
+    public sealed class ListVehiclesOutput : IUseCaseOutput
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ListAvailableVehiclesOutput"/> class.
+        /// Initializes a new instance of the <see cref="ListVehiclesOutput"/> class.
         /// </summary>
         /// <param name="vehicles">The vehicles of the fleet.</param>
-        public ListAvailableVehiclesOutput(IReadOnlyCollection<VehicleDto> vehicles)
+        public ListVehiclesOutput(IReadOnlyCollection<VehicleDto> vehicles)
         {
             Vehicles = vehicles;
         }

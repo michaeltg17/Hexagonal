@@ -25,9 +25,24 @@ namespace GtMotive.Estimate.Microservice.FunctionalTests.Infrastructure
             return Task.FromResult(_vehicles.FirstOrDefault(vehicle => vehicle.Id == vehicleId));
         }
 
-        public Task<IReadOnlyCollection<IVehicle>> GetAll()
+        public Task<IReadOnlyCollection<IVehicle>> GetAll(bool? available)
         {
-            var vehicles = _vehicles.ToList();
+            var vehicles = new List<IVehicle>();
+
+            foreach (var vehicle in _vehicles)
+            {
+                if (available == true && !vehicle.IsAvailable)
+                {
+                    continue;
+                }
+
+                if (available == false && vehicle.IsAvailable)
+                {
+                    continue;
+                }
+
+                vehicles.Add(vehicle);
+            }
 
             return Task.FromResult<IReadOnlyCollection<IVehicle>>(vehicles);
         }

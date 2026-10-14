@@ -61,14 +61,24 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.Repositories
         }
 
         /// <summary>
-        /// Gets all the vehicles of the fleet.
+        /// Gets the vehicles of the fleet, optionally filtered by availability.
         /// </summary>
+        /// <param name="available">Availability filter: <c>true</c> only available, <c>false</c> only unavailable, <c>null</c> all.</param>
         /// <returns>The vehicles of the fleet.</returns>
-        public async Task<IReadOnlyCollection<IVehicle>> GetAll()
+        public async Task<IReadOnlyCollection<IVehicle>> GetAll(bool? available)
         {
-            var documents = await _collection
-                .Find(FilterDefinition<VehicleDocument>.Empty)
-                .ToListAsync();
+            var documents = available switch
+            {
+                true => await _collection
+                    .Find(vehicle => !vehicle.Rentals.Any(rental => rental.ReturnDate == null))
+                    .ToListAsync(),
+                false => await _collection
+                    .Find(vehicle => vehicle.Rentals.Any(rental => rental.ReturnDate == null))
+                    .ToListAsync(),
+                _ => await _collection
+                    .Find(FilterDefinition<VehicleDocument>.Empty)
+                    .ToListAsync(),
+            };
 
             return documents.Select(MapToEntity).ToList();
         }

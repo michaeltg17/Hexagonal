@@ -6,7 +6,7 @@ using FluentAssertions;
 using GtMotive.Estimate.Microservice.Api.UseCases;
 using GtMotive.Estimate.Microservice.Api.UseCases.CreateVehicle;
 using GtMotive.Estimate.Microservice.Api.UseCases.GetVehicle;
-using GtMotive.Estimate.Microservice.Api.UseCases.ListAvailableVehicles;
+using GtMotive.Estimate.Microservice.Api.UseCases.ListVehicles;
 using GtMotive.Estimate.Microservice.Api.UseCases.RentVehicle;
 using GtMotive.Estimate.Microservice.Api.UseCases.ReturnVehicle;
 using GtMotive.Estimate.Microservice.Api.ViewModels;
@@ -118,27 +118,27 @@ namespace GtMotive.Estimate.Microservice.FunctionalTests.Specs
         }
 
         [Fact]
-        public async Task ListAvailableVehicles_WhenIsAvailableIsNotProvided_ReturnsOnlyAvailableVehicles()
+        public async Task ListVehicles_WhenAvailableIsNotProvided_ReturnsAllVehicles()
         {
             var availableVehicle = await CreateVehicleAsync(UniquePlate());
             var rentedVehicle = await CreateVehicleAsync(UniquePlate());
 
             (await RentAsync(rentedVehicle, UniquePerson())).Should().BeAssignableTo<OkObjectResult>();
-            var actionResult = await SendAsync(new ListAvailableVehiclesRequest(default));
+            var actionResult = await SendAsync(new ListVehiclesRequest(default));
             var vehicles = GetVehicles(actionResult);
 
             vehicles.Should().Contain(vehicle => vehicle.Plate == availableVehicle.Plate);
-            vehicles.Should().NotContain(vehicle => vehicle.Plate == rentedVehicle.Plate);
+            vehicles.Should().Contain(vehicle => vehicle.Plate == rentedVehicle.Plate);
         }
 
         [Fact]
-        public async Task ListAvailableVehicles_WhenIsAvailableIsFalse_ReturnsOnlyRentedVehicles()
+        public async Task ListVehicles_WhenAvailableIsFalse_ReturnsOnlyRentedVehicles()
         {
             var availableVehicle = await CreateVehicleAsync(UniquePlate());
             var rentedVehicle = await CreateVehicleAsync(UniquePlate());
 
             (await RentAsync(rentedVehicle, UniquePerson())).Should().BeAssignableTo<OkObjectResult>();
-            var actionResult = await SendAsync(new ListAvailableVehiclesRequest(false));
+            var actionResult = await SendAsync(new ListVehiclesRequest(false));
             var vehicles = GetVehicles(actionResult);
 
             vehicles.Should().Contain(vehicle => vehicle.Plate == rentedVehicle.Plate);

@@ -3,22 +3,22 @@ using System.Linq;
 using System.Threading.Tasks;
 using GtMotive.Estimate.Microservice.Domain.Interfaces;
 
-namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.ListAvailableVehicles
+namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.ListVehicles
 {
     /// <summary>
     /// Use case that lists the vehicles of the fleet.
     /// </summary>
-    public sealed class ListAvailableVehiclesUseCase : IUseCase<ListAvailableVehiclesInput>
+    public sealed class ListVehiclesUseCase : IUseCase<ListVehiclesInput>
     {
         private readonly IVehicleRepository _vehicleRepository;
-        private readonly IListAvailableVehiclesOutputPort _outputPort;
+        private readonly IListVehiclesOutputPort _outputPort;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ListAvailableVehiclesUseCase"/> class.
+        /// Initializes a new instance of the <see cref="ListVehiclesUseCase"/> class.
         /// </summary>
         /// <param name="vehicleRepository">Vehicle repository.</param>
         /// <param name="outputPort">Output port.</param>
-        public ListAvailableVehiclesUseCase(IVehicleRepository vehicleRepository, IListAvailableVehiclesOutputPort outputPort)
+        public ListVehiclesUseCase(IVehicleRepository vehicleRepository, IListVehiclesOutputPort outputPort)
         {
             _vehicleRepository = vehicleRepository ?? throw new ArgumentNullException(nameof(vehicleRepository));
             _outputPort = outputPort ?? throw new ArgumentNullException(nameof(outputPort));
@@ -29,18 +29,17 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.ListAvailableV
         /// </summary>
         /// <param name="input">Input message.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        public async Task Execute(ListAvailableVehiclesInput input)
+        public async Task Execute(ListVehiclesInput input)
         {
             ArgumentNullException.ThrowIfNull(input);
 
-            var vehicles = await _vehicleRepository.GetAll();
+            var vehicles = await _vehicleRepository.GetAll(input.Available);
 
             var result = vehicles
-                .Where(vehicle => input.IsAvailable == false ? !vehicle.IsAvailable : vehicle.IsAvailable)
                 .Select(VehicleDtoMapper.Map)
                 .ToList();
 
-            _outputPort.StandardHandle(new ListAvailableVehiclesOutput(result));
+            _outputPort.StandardHandle(new ListVehiclesOutput(result));
         }
     }
 }

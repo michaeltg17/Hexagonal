@@ -24,10 +24,11 @@ namespace GtMotive.Estimate.Microservice.Domain.Interfaces
         Task<IVehicle> GetBy(VehicleId vehicleId);
 
         /// <summary>
-        /// Gets all the vehicles of the fleet.
+        /// Gets the vehicles of the fleet, optionally filtered by availability.
         /// </summary>
+        /// <param name="available">Availability filter: <c>true</c> only available, <c>false</c> only unavailable, <c>null</c> all.</param>
         /// <returns>The vehicles of the fleet.</returns>
-        Task<IReadOnlyCollection<IVehicle>> GetAll();
+        Task<IReadOnlyCollection<IVehicle>> GetAll(bool? available);
 
         /// <summary>
         /// Updates an existing vehicle.

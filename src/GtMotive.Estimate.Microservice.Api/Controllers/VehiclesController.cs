@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using GtMotive.Estimate.Microservice.Api.UseCases.CreateVehicle;
 using GtMotive.Estimate.Microservice.Api.UseCases.GetVehicle;
-using GtMotive.Estimate.Microservice.Api.UseCases.ListAvailableVehicles;
+using GtMotive.Estimate.Microservice.Api.UseCases.ListVehicles;
 using GtMotive.Estimate.Microservice.Api.UseCases.RentVehicle;
 using GtMotive.Estimate.Microservice.Api.UseCases.ReturnVehicle;
 using GtMotive.Estimate.Microservice.Api.ViewModels;
@@ -50,13 +50,13 @@ namespace GtMotive.Estimate.Microservice.Api.Controllers
         /// <summary>
         /// Lists the vehicles of the fleet.
         /// </summary>
-        /// <param name="isAvailable">Whether to list only the available vehicles.</param>
+        /// <param name="available">Availability filter: <c>null</c> all, <c>true</c> only available, <c>false</c> only unavailable.</param>
         /// <returns>The vehicles of the fleet.</returns>
         [HttpGet]
         [ProducesResponseType(typeof(IReadOnlyCollection<VehicleViewModel>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> List([FromQuery] bool? isAvailable)
+        public async Task<IActionResult> List([FromQuery] bool? available)
         {
-            var presenter = await _requestSender.Send(new ListAvailableVehiclesRequest(isAvailable));
+            var presenter = await _requestSender.Send(new ListVehiclesRequest(available));
 
             return presenter.ActionResult;
         }
@@ -80,16 +80,16 @@ namespace GtMotive.Estimate.Microservice.Api.Controllers
         /// Rents a vehicle to a person.
         /// </summary>
         /// <param name="vehicleId">Vehicle identifier.</param>
-        /// <param name="vehicle">Rental data.</param>
+        /// <param name="rental">Rental data.</param>
         /// <returns>The rented vehicle.</returns>
         [HttpPost("{vehicleId:guid}/rent")]
         [ProducesResponseType(typeof(VehicleViewModel), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
-        public async Task<IActionResult> Rent(Guid vehicleId, [FromBody] RentVehicleViewModel vehicle)
+        public async Task<IActionResult> Rent(Guid vehicleId, [FromBody] RentVehicleViewModel rental)
         {
-            var presenter = await _requestSender.Send(new RentVehicleRequest(vehicleId, vehicle));
+            var presenter = await _requestSender.Send(new RentVehicleRequest(vehicleId, rental));
 
             return presenter.ActionResult;
         }

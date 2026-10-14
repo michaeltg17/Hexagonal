@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Linq;
 using GtMotive.Estimate.Microservice.Api.Helpers;
-using GtMotive.Estimate.Microservice.ApplicationCore.UseCases.ListAvailableVehicles;
+using GtMotive.Estimate.Microservice.ApplicationCore.UseCases.ListVehicles;
 using Microsoft.AspNetCore.Mvc;
 
-namespace GtMotive.Estimate.Microservice.Api.UseCases.ListAvailableVehicles
+namespace GtMotive.Estimate.Microservice.Api.UseCases.ListVehicles
 {
     /// <summary>
-    /// Web API presenter of the list available vehicles use case.
+    /// Web API presenter of the list vehicles use case.
     /// </summary>
-    public sealed class ListAvailableVehiclesPresenter : IWebApiPresenter, IListAvailableVehiclesOutputPort
+    public sealed class ListVehiclesPresenter : IWebApiPresenter, IListVehiclesOutputPort
     {
         private IActionResult _actionResult;
 
@@ -22,7 +22,7 @@ namespace GtMotive.Estimate.Microservice.Api.UseCases.ListAvailableVehicles
         /// Handles the successful listing of the vehicles.
         /// </summary>
         /// <param name="response">The output port message.</param>
-        public void StandardHandle(ListAvailableVehiclesOutput response)
+        public void StandardHandle(ListVehiclesOutput response)
         {
             ArgumentNullException.ThrowIfNull(response);
 

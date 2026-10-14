@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using GtMotive.Estimate.Microservice.ApplicationCore.UseCases;
 using GtMotive.Estimate.Microservice.ApplicationCore.UseCases.CreateVehicle;
 using GtMotive.Estimate.Microservice.ApplicationCore.UseCases.GetVehicle;
-using GtMotive.Estimate.Microservice.ApplicationCore.UseCases.ListAvailableVehicles;
+using GtMotive.Estimate.Microservice.ApplicationCore.UseCases.ListVehicles;
 using GtMotive.Estimate.Microservice.ApplicationCore.UseCases.RentVehicle;
 using GtMotive.Estimate.Microservice.ApplicationCore.UseCases.ReturnVehicle;
 using GtMotive.Estimate.Microservice.Domain.Services;
@@ -28,7 +28,7 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore
         {
             services.AddScoped<VehicleService>();
             services.AddScoped<IUseCase<CreateVehicleInput>, CreateVehicleUseCase>();
-            services.AddScoped<IUseCase<ListAvailableVehiclesInput>, ListAvailableVehiclesUseCase>();
+            services.AddScoped<IUseCase<ListVehiclesInput>, ListVehiclesUseCase>();
             services.AddScoped<IUseCase<GetVehicleInput>, GetVehicleUseCase>();
             services.AddScoped<IUseCase<RentVehicleInput>, RentVehicleUseCase>();
             services.AddScoped<IUseCase<ReturnVehicleInput>, ReturnVehicleUseCase>();
