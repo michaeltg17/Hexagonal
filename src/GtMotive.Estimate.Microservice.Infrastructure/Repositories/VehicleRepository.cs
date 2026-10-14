@@ -18,8 +18,7 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.Repositories
         private const string CollectionName = "vehicles";
 
         private readonly IMongoCollection<VehicleDocument> _collection;
-        private readonly List<IVehicle> _toInsert = [];
-        private readonly List<IVehicle> _toUpdate = [];
+        private readonly List<IVehicle> _toSave = [];
 
         /// <summary>
         /// Initializes a new instance of the <see cref="VehicleRepository"/> class.
@@ -41,7 +40,7 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.Repositories
         {
             ArgumentNullException.ThrowIfNull(vehicle);
 
-            _toInsert.Add(vehicle);
+            _toSave.Add(vehicle);
 
             return Task.CompletedTask;
         }
@@ -92,7 +91,7 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.Repositories
         {
             ArgumentNullException.ThrowIfNull(vehicle);
 
-            _toUpdate.Add(vehicle);
+            _toSave.Add(vehicle);
 
             return Task.CompletedTask;
         }
@@ -130,22 +129,17 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.Repositories
         {
             var saved = 0;
 
-            foreach (var vehicle in _toInsert)
-            {
-                await _collection.InsertOneAsync(MapToDocument(vehicle));
-                saved++;
-            }
-
-            _toInsert.Clear();
-
-            foreach (var vehicle in _toUpdate)
+            foreach (var vehicle in _toSave)
             {
                 var document = MapToDocument(vehicle);
-                await _collection.ReplaceOneAsync(v => v.Id == document.Id, document);
+                await _collection.ReplaceOneAsync(
+                    v => v.Id == document.Id,
+                    document,
+                    new ReplaceOptions { IsUpsert = true });
                 saved++;
             }
 
-            _toUpdate.Clear();
+            _toSave.Clear();
 
             return saved;
         }
