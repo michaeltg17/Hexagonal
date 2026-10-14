@@ -37,7 +37,7 @@
 - [Authorization](#authorization)
 
 ## Introduction
-Sample implementation of the Clean Architecture Principles with .NET Core. Use cases as central organizing structure, decoupled from frameworks and technology details. Built with small components that are developed and tested in isolation.
+Sample implementation of the Clean Architecture Principles with .NET. Use cases as central organizing structure, decoupled from frameworks and technology details. Built with small components that are developed and tested in isolation.
 
 This template is a Renting Company microservice: a fleet manager registers new vehicles in the fleet, a customer lists the available vehicles, rents one of them and later returns it. The fleet can not contain vehicles older than 5 years and a person can not have more than 1 active rental at the same time.
 
