@@ -1,10 +1,16 @@
-﻿using Xunit;
+﻿using System;
+using Xunit;
 
 namespace GtMotive.Estimate.Microservice.InfrastructureTests.Infrastructure
 {
     [Collection(TestCollections.TestServer)]
-    internal abstract class InfrastructureTestBase(GenericInfrastructureTestServerFixture fixture)
+    public abstract class InfrastructureTestBase
     {
-        protected GenericInfrastructureTestServerFixture Fixture { get; } = fixture;
+        protected InfrastructureTestBase(GenericInfrastructureTestServerFixture fixture)
+        {
+            Fixture = fixture ?? throw new ArgumentNullException(nameof(fixture));
+        }
+
+        protected GenericInfrastructureTestServerFixture Fixture { get; }
     }
 }
