@@ -13,11 +13,11 @@ namespace GtMotive.Estimate.Microservice.Api.UseCases.RentVehicle
         /// Initializes a new instance of the <see cref="RentVehicleRequest"/> class.
         /// </summary>
         /// <param name="vehicleId">Vehicle identifier.</param>
-        /// <param name="vehicle">Rental data.</param>
-        public RentVehicleRequest(Guid vehicleId, RentVehicleViewModel vehicle)
+        /// <param name="rental">Rental data.</param>
+        public RentVehicleRequest(Guid vehicleId, RentVehicleViewModel rental)
         {
             VehicleId = vehicleId;
-            Vehicle = vehicle;
+            Rental = rental;
         }
 
         /// <summary>
@@ -28,6 +28,6 @@ namespace GtMotive.Estimate.Microservice.Api.UseCases.RentVehicle
         /// <summary>
         /// Gets the rental data.
         /// </summary>
-        public RentVehicleViewModel Vehicle { get; }
+        public RentVehicleViewModel Rental { get; }
     }
 }

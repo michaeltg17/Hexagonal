@@ -5,10 +5,5 @@
     /// </summary>
     public interface IGetVehicleOutputPort : IOutputPortStandard<GetVehicleOutput>, IOutputPortNotFound
     {
-        /// <summary>
-        /// Informs that the input was invalid.
-        /// </summary>
-        /// <param name="message">Text description.</param>
-        void BadRequestHandle(string message);
     }
 }

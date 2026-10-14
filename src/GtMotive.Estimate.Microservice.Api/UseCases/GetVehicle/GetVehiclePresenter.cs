@@ -36,14 +36,5 @@ namespace GtMotive.Estimate.Microservice.Api.UseCases.GetVehicle
         {
             _actionResult = new NotFoundObjectResult(ProblemDetailsHelper.NotFound(message));
         }
-
-        /// <summary>
-        /// Handles a bad request response.
-        /// </summary>
-        /// <param name="message">Text description.</param>
-        public void BadRequestHandle(string message)
-        {
-            _actionResult = new BadRequestObjectResult(ProblemDetailsHelper.BadRequest(message));
-        }
     }
 }

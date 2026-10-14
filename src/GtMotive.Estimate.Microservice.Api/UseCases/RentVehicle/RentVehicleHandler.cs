@@ -38,7 +38,7 @@ namespace GtMotive.Estimate.Microservice.Api.UseCases.RentVehicle
 
             _ = cancellationToken;
 
-            await _rentVehicleUseCase.Execute(new RentVehicleInput(request.VehicleId, request.Vehicle.Person));
+            await _rentVehicleUseCase.Execute(new RentVehicleInput(request.VehicleId, request.Rental.Person));
 
             return _presenter;
         }
