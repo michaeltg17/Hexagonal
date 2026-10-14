@@ -1,14 +1,20 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace GtMotive.Estimate.Microservice.FunctionalTests.Infrastructure
 {
     [Collection(TestCollections.Functional)]
-    internal abstract class FunctionalTestBase(CompositionRootTestFixture fixture) : IAsyncLifetime
+    public abstract class FunctionalTestBase : IAsyncLifetime
     {
         public const int QueueWaitingTimeInMilliseconds = 1000;
 
-        protected CompositionRootTestFixture Fixture { get; } = fixture;
+        protected FunctionalTestBase(CompositionRootTestFixture fixture)
+        {
+            Fixture = fixture ?? throw new ArgumentNullException(nameof(fixture));
+        }
+
+        protected CompositionRootTestFixture Fixture { get; }
 
         public async Task InitializeAsync()
         {

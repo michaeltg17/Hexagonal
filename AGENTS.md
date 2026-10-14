@@ -56,7 +56,7 @@ Package versions are pinned centrally in `Directory.Build.targets` (tests: `test
 ## Roadmap (step by step)
 
 1. Domain: `Vehicle` (plate, make, model, manufacture date), `Rental` (person), invariants (age ≤ 5 years, one active rental per person).
-2. ApplicationCore: use cases `CreateVehicle`, `ListAvailableVehicles`, `RentVehicle`, `ReturnVehicle` + inputs/outputs/ports; wire in `AddUseCases`.
+2. ApplicationCore: use cases `CreateVehicle`, `ListVehicles`, `RentVehicle`, `ReturnVehicle` + inputs/outputs/ports; wire in `AddUseCases`.
 3. Infrastructure: Mongo entities/collections, `VehicleRepository`, `EntityFactory`, `UnitOfWork`; wire in `AddBaseInfrastructure`.
 4. Api: `VehiclesController` endpoints, MediatR requests/handlers, presenters, view models.
 5. Tests: one unit, one functional, one infrastructure (per task spec).

@@ -1,10 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-
-    <IsPackable>false</IsPackable>
-  </PropertyGroup>
+    <PropertyGroup>
+      <TargetFramework>net9.0</TargetFramework>
+      <GenerateDocumentationFile>true</GenerateDocumentationFile>
+      <NoWarn>1591</NoWarn>
+      <IsPackable>false</IsPackable>
+    </PropertyGroup>
 
   <ItemGroup>
     <Compile Remove="Domain\**" />
@@ -12,9 +13,9 @@
     <None Remove="Domain\**" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Moq" Version="4.16.0" />
-  </ItemGroup>
+    <ItemGroup>
+      <PackageReference Include="Moq" />
+    </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\GtMotive.Estimate.Microservice.Api\GtMotive.Estimate.Microservice.Api.csproj" />
