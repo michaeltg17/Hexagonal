@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using GtMotive.Estimate.Microservice.Domain.Interfaces;
-using GtMotive.Estimate.Microservice.Domain.ValueObjects;
+using GtMotive.Estimate.Microservice.Domain.Vehicles;
 
 namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.GetVehicle
 {

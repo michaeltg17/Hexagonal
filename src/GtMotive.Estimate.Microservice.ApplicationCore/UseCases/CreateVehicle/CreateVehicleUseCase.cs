@@ -4,7 +4,7 @@ using GtMotive.Estimate.Microservice.Domain;
 using GtMotive.Estimate.Microservice.Domain.Exceptions;
 using GtMotive.Estimate.Microservice.Domain.Interfaces;
 using GtMotive.Estimate.Microservice.Domain.Services;
-using GtMotive.Estimate.Microservice.Domain.ValueObjects;
+using GtMotive.Estimate.Microservice.Domain.Vehicles;
 
 namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.CreateVehicle
 {

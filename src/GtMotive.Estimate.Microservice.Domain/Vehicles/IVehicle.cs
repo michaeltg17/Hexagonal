@@ -1,8 +1,6 @@
 ﻿using System;
-using GtMotive.Estimate.Microservice.Domain.Entities;
-using GtMotive.Estimate.Microservice.Domain.ValueObjects;
 
-namespace GtMotive.Estimate.Microservice.Domain.Interfaces
+namespace GtMotive.Estimate.Microservice.Domain.Vehicles
 {
     /// <summary>
     /// Vehicle aggregate root contract.

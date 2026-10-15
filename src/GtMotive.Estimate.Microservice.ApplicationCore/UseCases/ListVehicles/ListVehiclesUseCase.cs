@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using GtMotive.Estimate.Microservice.Domain.Interfaces;
+using GtMotive.Estimate.Microservice.Domain.Vehicles;
 
 namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.ListVehicles
 {

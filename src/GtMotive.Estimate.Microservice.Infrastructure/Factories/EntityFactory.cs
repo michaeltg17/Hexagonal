@@ -1,5 +1,4 @@
-﻿using GtMotive.Estimate.Microservice.Domain.Interfaces;
-using GtMotive.Estimate.Microservice.Domain.ValueObjects;
+﻿using GtMotive.Estimate.Microservice.Domain.Vehicles;
 using GtMotive.Estimate.Microservice.Infrastructure.Entities;
 
 namespace GtMotive.Estimate.Microservice.Infrastructure.Factories
