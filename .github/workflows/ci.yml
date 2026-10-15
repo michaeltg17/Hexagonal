@@ -33,14 +33,7 @@ jobs:
           cache-to: type=gha,mode=max,scope=hexagonal-ci
 
       - name: Run CI checks
-        # Mount the Docker socket so Testcontainers can start the MongoDB container.
-        # TESTCONTAINERS_HOST_OVERRIDE lets the in-container test host reach the
-        # published ports of the Testcontainers containers (MongoDB, Ryuk).
-        run: |
-          docker run --rm \
-            -v /var/run/docker.sock:/var/run/docker.sock \
-            -e TESTCONTAINERS_HOST_OVERRIDE=host.docker.internal \
-            hexagonal-ci:latest
+        run: docker run --rm -v /var/run/docker.sock:/var/run/docker.sock hexagonal-ci:latest
 
       - name: Validate Docker image builds
         uses: docker/build-push-action@v7
