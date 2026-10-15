@@ -8,15 +8,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Compile Remove="Api\**" />
-      <Compile Remove="Infrastructure\**" />
-      <EmbeddedResource Remove="Api\**" />
-      <EmbeddedResource Remove="Infrastructure\**" />
-      <None Remove="Api\**" />
-      <None Remove="Infrastructure\**" />
-    </ItemGroup>
-
-    <ItemGroup>
       <PackageReference Include="Moq" />
     </ItemGroup>
 
