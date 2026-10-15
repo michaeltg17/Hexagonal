@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GtMotive.Estimate.Microservice.Domain.Interfaces;
-using GtMotive.Estimate.Microservice.Domain.ValueObjects;
+using GtMotive.Estimate.Microservice.Domain.Vehicles;
 using GtMotive.Estimate.Microservice.Infrastructure.Entities;
 using GtMotive.Estimate.Microservice.Infrastructure.MongoDb.Entities;
 using MongoDB.Driver;

@@ -1,9 +1,7 @@
 ﻿using System;
 using GtMotive.Estimate.Microservice.Domain.Exceptions;
-using GtMotive.Estimate.Microservice.Domain.Interfaces;
-using GtMotive.Estimate.Microservice.Domain.ValueObjects;
 
-namespace GtMotive.Estimate.Microservice.Domain.Entities
+namespace GtMotive.Estimate.Microservice.Domain.Vehicles
 {
     /// <summary>
     /// Vehicle aggregate root.

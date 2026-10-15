@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
-using GtMotive.Estimate.Microservice.Domain.Entities;
-using GtMotive.Estimate.Microservice.Domain.Interfaces;
-using GtMotive.Estimate.Microservice.Domain.ValueObjects;
+using GtMotive.Estimate.Microservice.Domain.Vehicles;
 
 namespace GtMotive.Estimate.Microservice.Infrastructure.Entities
 {

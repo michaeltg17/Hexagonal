@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using GtMotive.Estimate.Microservice.Domain.Interfaces;
 
-namespace GtMotive.Estimate.Microservice.Domain.Entities
+namespace GtMotive.Estimate.Microservice.Domain.Vehicles
 {
     /// <summary>
     /// First-class collection of rentals of a vehicle.
