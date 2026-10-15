@@ -6,7 +6,7 @@ namespace GtMotive.Estimate.Microservice.Api.UseCases.GetVehicle
     /// <summary>
     /// MediatR request of the get vehicle use case.
     /// </summary>
-    public sealed class GetVehicleRequest : IRequest<IWebApiPresenter>
+    public sealed record GetVehicleRequest : IRequest<IWebApiPresenter>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="GetVehicleRequest"/> class.
@@ -20,6 +20,6 @@ namespace GtMotive.Estimate.Microservice.Api.UseCases.GetVehicle
         /// <summary>
         /// Gets the vehicle identifier.
         /// </summary>
-        public Guid VehicleId { get; }
+        public Guid VehicleId { get; init; }
     }
 }

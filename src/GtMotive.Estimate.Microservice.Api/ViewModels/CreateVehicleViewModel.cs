@@ -7,7 +7,7 @@ namespace GtMotive.Estimate.Microservice.Api.ViewModels
     /// <summary>
     /// View model to create a new vehicle.
     /// </summary>
-    public class CreateVehicleViewModel
+    public sealed record CreateVehicleViewModel
     {
         /// <summary>
         /// Gets or sets the plate.

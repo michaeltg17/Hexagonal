@@ -5,7 +5,7 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases
     /// <summary>
     /// Read model of a vehicle.
     /// </summary>
-    public sealed class VehicleDto
+    public sealed record VehicleDto
     {
         /// <summary>
         /// Gets the vehicle identifier.

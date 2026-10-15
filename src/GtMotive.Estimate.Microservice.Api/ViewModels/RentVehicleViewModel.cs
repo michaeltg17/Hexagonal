@@ -5,7 +5,7 @@ namespace GtMotive.Estimate.Microservice.Api.ViewModels
     /// <summary>
     /// View model to rent a vehicle.
     /// </summary>
-    public class RentVehicleViewModel
+    public sealed record RentVehicleViewModel
     {
         /// <summary>
         /// Gets or sets the person that rents the vehicle.

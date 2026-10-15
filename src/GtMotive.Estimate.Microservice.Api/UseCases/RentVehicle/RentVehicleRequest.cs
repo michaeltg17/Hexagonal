@@ -7,7 +7,7 @@ namespace GtMotive.Estimate.Microservice.Api.UseCases.RentVehicle
     /// <summary>
     /// MediatR request of the rent vehicle use case.
     /// </summary>
-    public sealed class RentVehicleRequest : IRequest<IWebApiPresenter>
+    public sealed record RentVehicleRequest : IRequest<IWebApiPresenter>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="RentVehicleRequest"/> class.
@@ -23,11 +23,11 @@ namespace GtMotive.Estimate.Microservice.Api.UseCases.RentVehicle
         /// <summary>
         /// Gets the vehicle identifier.
         /// </summary>
-        public Guid VehicleId { get; }
+        public Guid VehicleId { get; init; }
 
         /// <summary>
         /// Gets the rental data.
         /// </summary>
-        public RentVehicleViewModel Rental { get; }
+        public RentVehicleViewModel Rental { get; init; }
     }
 }

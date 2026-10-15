@@ -5,7 +5,7 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.RentVehicle
     /// <summary>
     /// Input message of the rent vehicle use case.
     /// </summary>
-    public sealed class RentVehicleInput : IUseCaseInput
+    public sealed record RentVehicleInput : IUseCaseInput
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="RentVehicleInput"/> class.
@@ -21,11 +21,11 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.RentVehicle
         /// <summary>
         /// Gets the vehicle identifier.
         /// </summary>
-        public Guid VehicleId { get; }
+        public Guid VehicleId { get; init; }
 
         /// <summary>
         /// Gets the person that rents the vehicle.
         /// </summary>
-        public string Person { get; }
+        public string Person { get; init; }
     }
 }

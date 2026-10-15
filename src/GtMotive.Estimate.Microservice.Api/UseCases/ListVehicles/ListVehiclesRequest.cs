@@ -5,7 +5,7 @@ namespace GtMotive.Estimate.Microservice.Api.UseCases.ListVehicles
     /// <summary>
     /// MediatR request of the list vehicles use case.
     /// </summary>
-    public sealed class ListVehiclesRequest : IRequest<IWebApiPresenter>
+    public sealed record ListVehiclesRequest : IRequest<IWebApiPresenter>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ListVehiclesRequest"/> class.
@@ -19,6 +19,6 @@ namespace GtMotive.Estimate.Microservice.Api.UseCases.ListVehicles
         /// <summary>
         /// Gets the availability filter.
         /// </summary>
-        public bool? Available { get; }
+        public bool? Available { get; init; }
     }
 }
