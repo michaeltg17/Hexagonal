@@ -2,6 +2,7 @@
 using FluentAssertions;
 using GtMotive.Estimate.Microservice.Domain.Entities;
 using GtMotive.Estimate.Microservice.Domain.Exceptions;
+using GtMotive.Estimate.Microservice.Domain.Interfaces;
 using Moq;
 using Xunit;
 
