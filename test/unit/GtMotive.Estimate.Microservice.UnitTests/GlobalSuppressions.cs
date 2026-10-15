@@ -5,5 +5,5 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-[assembly: SuppressMessage("Design", "CA1515:Consider making public types internal", Justification = "xUnit test classes must be public (xUnit1000).", Scope = "type", Target = "~T:GtMotive.Estimate.Microservice.UnitTests.ApplicationCore.CreateVehicleUseCaseTests")]
+[assembly: SuppressMessage("Design", "CA1515:Consider making public types internal", Justification = "xUnit test classes must be public (xUnit1000).", Scope = "type", Target = "~T:GtMotive.Estimate.Microservice.UnitTests.Domain.VehicleTests")]
 [assembly: SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Justification = "xUnit test method naming convention.")]
