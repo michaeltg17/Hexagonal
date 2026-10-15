@@ -3,7 +3,7 @@
     /// <summary>
     /// Output message of the rent vehicle use case.
     /// </summary>
-    public sealed class RentVehicleOutput : IUseCaseOutput
+    public sealed record RentVehicleOutput : IUseCaseOutput
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="RentVehicleOutput"/> class.
@@ -17,6 +17,6 @@
         /// <summary>
         /// Gets the rented vehicle.
         /// </summary>
-        public VehicleDto Vehicle { get; }
+        public VehicleDto Vehicle { get; init; }
     }
 }

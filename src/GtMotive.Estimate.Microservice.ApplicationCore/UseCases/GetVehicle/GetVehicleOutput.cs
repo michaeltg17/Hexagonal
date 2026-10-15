@@ -3,7 +3,7 @@
     /// <summary>
     /// Output message of the get vehicle use case.
     /// </summary>
-    public sealed class GetVehicleOutput : IUseCaseOutput
+    public sealed record GetVehicleOutput : IUseCaseOutput
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="GetVehicleOutput"/> class.
@@ -17,6 +17,6 @@
         /// <summary>
         /// Gets the vehicle.
         /// </summary>
-        public VehicleDto Vehicle { get; }
+        public VehicleDto Vehicle { get; init; }
     }
 }

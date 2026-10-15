@@ -5,7 +5,7 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.ListVehicles
     /// <summary>
     /// Output message of the list vehicles use case.
     /// </summary>
-    public sealed class ListVehiclesOutput : IUseCaseOutput
+    public sealed record ListVehiclesOutput : IUseCaseOutput
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ListVehiclesOutput"/> class.
@@ -19,6 +19,6 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.ListVehicles
         /// <summary>
         /// Gets the vehicles of the fleet.
         /// </summary>
-        public IReadOnlyCollection<VehicleDto> Vehicles { get; }
+        public IReadOnlyCollection<VehicleDto> Vehicles { get; init; }
     }
 }

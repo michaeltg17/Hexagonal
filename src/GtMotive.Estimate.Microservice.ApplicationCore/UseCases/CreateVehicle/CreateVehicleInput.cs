@@ -5,7 +5,7 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.CreateVehicle
     /// <summary>
     /// Input message of the create vehicle use case.
     /// </summary>
-    public sealed class CreateVehicleInput : IUseCaseInput
+    public sealed record CreateVehicleInput : IUseCaseInput
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CreateVehicleInput"/> class.
@@ -25,21 +25,21 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.CreateVehicle
         /// <summary>
         /// Gets the plate.
         /// </summary>
-        public string Plate { get; }
+        public string Plate { get; init; }
 
         /// <summary>
         /// Gets the make.
         /// </summary>
-        public string Make { get; }
+        public string Make { get; init; }
 
         /// <summary>
         /// Gets the model.
         /// </summary>
-        public string Model { get; }
+        public string Model { get; init; }
 
         /// <summary>
         /// Gets the manufacture date.
         /// </summary>
-        public DateTime ManufactureDate { get; }
+        public DateTime ManufactureDate { get; init; }
     }
 }

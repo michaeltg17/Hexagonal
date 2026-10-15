@@ -3,7 +3,7 @@
     /// <summary>
     /// Input message of the list vehicles use case.
     /// </summary>
-    public sealed class ListVehiclesInput : IUseCaseInput
+    public sealed record ListVehiclesInput : IUseCaseInput
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ListVehiclesInput"/> class.
@@ -17,6 +17,6 @@
         /// <summary>
         /// Gets the availability filter.
         /// </summary>
-        public bool? Available { get; }
+        public bool? Available { get; init; }
     }
 }

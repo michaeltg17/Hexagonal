@@ -5,7 +5,7 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.GetVehicle
     /// <summary>
     /// Input message of the get vehicle use case.
     /// </summary>
-    public sealed class GetVehicleInput : IUseCaseInput
+    public sealed record GetVehicleInput : IUseCaseInput
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="GetVehicleInput"/> class.
@@ -19,6 +19,6 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.GetVehicle
         /// <summary>
         /// Gets the vehicle identifier.
         /// </summary>
-        public Guid VehicleId { get; }
+        public Guid VehicleId { get; init; }
     }
 }

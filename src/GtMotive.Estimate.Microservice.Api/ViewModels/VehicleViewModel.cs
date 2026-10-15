@@ -5,36 +5,36 @@ namespace GtMotive.Estimate.Microservice.Api.ViewModels
     /// <summary>
     /// View model of a vehicle.
     /// </summary>
-    public class VehicleViewModel
+    public sealed record VehicleViewModel
     {
         /// <summary>
-        /// Gets or sets the vehicle identifier.
+        /// Gets the vehicle identifier.
         /// </summary>
-        public Guid Id { get; set; }
+        public Guid Id { get; init; }
 
         /// <summary>
-        /// Gets or sets the plate.
+        /// Gets the plate.
         /// </summary>
-        public string Plate { get; set; }
+        public string Plate { get; init; }
 
         /// <summary>
-        /// Gets or sets the make.
+        /// Gets the make.
         /// </summary>
-        public string Make { get; set; }
+        public string Make { get; init; }
 
         /// <summary>
-        /// Gets or sets the model.
+        /// Gets the model.
         /// </summary>
-        public string Model { get; set; }
+        public string Model { get; init; }
 
         /// <summary>
-        /// Gets or sets the manufacture date.
+        /// Gets the manufacture date.
         /// </summary>
-        public DateTime ManufactureDate { get; set; }
+        public DateTime ManufactureDate { get; init; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the vehicle is available.
+        /// Gets a value indicating whether the vehicle is available.
         /// </summary>
-        public bool IsAvailable { get; set; }
+        public bool IsAvailable { get; init; }
     }
 }
