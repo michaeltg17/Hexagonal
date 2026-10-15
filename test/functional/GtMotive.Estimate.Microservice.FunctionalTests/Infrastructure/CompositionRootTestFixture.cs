@@ -1,24 +1,48 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using DotNet.Testcontainers.Builders;
 using GtMotive.Estimate.Microservice.Api;
-using GtMotive.Estimate.Microservice.Domain.Interfaces;
 using GtMotive.Estimate.Microservice.Infrastructure;
+using GtMotive.Estimate.Microservice.Infrastructure.MongoDb.Settings;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Driver;
+using Testcontainers.MongoDb;
 using Xunit;
 
 [assembly: CLSCompliant(false)]
 
 namespace GtMotive.Estimate.Microservice.FunctionalTests.Infrastructure
 {
-    public sealed class CompositionRootTestFixture : IDisposable, IAsyncLifetime
+    public sealed class CompositionRootTestFixture : IAsyncLifetime
     {
-        private readonly ServiceProvider _serviceProvider;
+        private const string MongoImage = "mongo:8";
+        private const int MongoPort = 27017;
+        private const string VehiclesCollectionName = "vehicles";
+        private static readonly TimeSpan WaitStrategyTimeout = TimeSpan.FromMinutes(2);
+
+        private readonly MongoDbContainer _container;
+        private ServiceProvider _serviceProvider;
 
         public CompositionRootTestFixture()
         {
+            _container = new MongoDbBuilder(MongoImage)
+                .WithExposedPort(MongoPort)
+                .WithWaitStrategy(
+                    Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(
+                        MongoPort,
+                        strategy => strategy.WithTimeout(WaitStrategyTimeout)))
+                .Build();
+        }
+
+        public IConfiguration Configuration { get; private set; }
+
+        public async Task InitializeAsync()
+        {
+            await _container.StartAsync();
+
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .AddEnvironmentVariables()
@@ -26,21 +50,19 @@ namespace GtMotive.Estimate.Microservice.FunctionalTests.Infrastructure
 
             var services = new ServiceCollection();
             Configuration = configuration;
-            ConfigureServices(services);
+            ConfigureServices(services, _container.GetConnectionString());
             services.AddSingleton<IConfiguration>(configuration);
             _serviceProvider = services.BuildServiceProvider();
         }
 
-        public IConfiguration Configuration { get; }
-
-        public async Task InitializeAsync()
-        {
-            await Task.CompletedTask;
-        }
-
         public async Task DisposeAsync()
         {
-            await Task.CompletedTask;
+            if (_serviceProvider is not null)
+            {
+                await _serviceProvider.DisposeAsync();
+            }
+
+            await _container.DisposeAsync();
         }
 
         public async Task UsingHandlerForRequest<TRequest>(Func<IRequestHandler<TRequest, Unit>, Task> handlerAction)
@@ -85,22 +107,25 @@ namespace GtMotive.Estimate.Microservice.FunctionalTests.Infrastructure
             await handlerAction.Invoke(handler);
         }
 
-        public void Dispose()
+        public async Task ResetDatabaseAsync()
         {
-            _serviceProvider.Dispose();
+            using var scope = _serviceProvider.CreateScope();
+            var database = scope.ServiceProvider.GetRequiredService<IMongoDatabase>();
+
+            await database.DropCollectionAsync(VehiclesCollectionName);
         }
 
-        private static void ConfigureServices(IServiceCollection services)
+        private static void ConfigureServices(IServiceCollection services, string mongoConnectionString)
         {
             services.AddApiDependencies();
             services.AddLogging();
             services.AddBaseInfrastructure(true);
 
-            var vehicleRepository = new InMemoryVehicleRepository();
-
-            services.AddSingleton(vehicleRepository);
-            services.AddSingleton<IVehicleRepository>(vehicleRepository);
-            services.AddSingleton<IUnitOfWork>(new NoOpUnitOfWork());
+            services.Configure<MongoDbSettings>(options =>
+            {
+                options.ConnectionString = mongoConnectionString;
+                options.MongoDbDatabaseName = "hexagonal_functional_tests";
+            });
         }
     }
 }

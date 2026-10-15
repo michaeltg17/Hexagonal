@@ -33,7 +33,7 @@ jobs:
           cache-to: type=gha,mode=max,scope=hexagonal-ci
 
       - name: Run CI checks
-        run: docker run --rm hexagonal-ci:latest
+        run: docker run --rm -v /var/run/docker.sock:/var/run/docker.sock hexagonal-ci:latest
 
       - name: Validate Docker image builds
         uses: docker/build-push-action@v7

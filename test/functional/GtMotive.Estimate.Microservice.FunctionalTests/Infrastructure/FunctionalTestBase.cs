@@ -7,8 +7,6 @@ namespace GtMotive.Estimate.Microservice.FunctionalTests.Infrastructure
     [Collection(TestCollections.Functional)]
     public abstract class FunctionalTestBase : IAsyncLifetime
     {
-        public const int QueueWaitingTimeInMilliseconds = 1000;
-
         protected FunctionalTestBase(CompositionRootTestFixture fixture)
         {
             Fixture = fixture ?? throw new ArgumentNullException(nameof(fixture));
@@ -18,7 +16,7 @@ namespace GtMotive.Estimate.Microservice.FunctionalTests.Infrastructure
 
         public async Task InitializeAsync()
         {
-            await Task.CompletedTask;
+            await Fixture.ResetDatabaseAsync();
         }
 
         public async Task DisposeAsync()
