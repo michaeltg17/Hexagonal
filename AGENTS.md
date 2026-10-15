@@ -1,26 +1,6 @@
 # Hexagonal — Renting Microservice (.NET)
 
-.NET 9 microservice for a renting company, built on the provided hexagonal (ports & adapters) template. Persistence: MongoDB. Must be runnable locally by anyone with only docker/docker-compose.
-
-## Task spec (exam)
-
-REST endpoints:
-
-- Create a new vehicle in the fleet
-- List the available vehicles of the fleet
-- Rent a vehicle (for a person)
-- Return a vehicle
-
-Constraints:
-
-- A person can not have more than 1 active rental at the same time.
-- The fleet can not contain vehicles with a manufacture date older than 5 years.
-
-Required test examples (one of each is enough):
-
-- Unit: validate one implemented method without its dependencies.
-- Functional: integration test excluding the host.
-- Infrastructure: one REST endpoint at host level only (call reception + model validation), not complete.
+.NET 9 microservice for a renting company, built on the provided hexagonal (ports & adapters) template. Persistence: MongoDB.
 
 ## Layout
 
@@ -52,15 +32,6 @@ Package versions are pinned centrally in `Directory.Build.targets` (tests: `test
 - Field validation in domain value objects; business rules in entities/use cases; domain exceptions are caught in the use case and mapped to the output port error method (`BusinessExceptionFilter` covers the rest).
 - A new use case = one class in ApplicationCore + input/output + output port, registered in `AddUseCases`. A new endpoint = controller action + MediatR request + handler + presenter + view model in Api.
 - Style: StyleCop + Sonar analyzers with `EnforceCodeStyleInBuild`; warnings are errors in test projects; follow `.editorconfig` (file-scoped namespaces, CRLF, UTF-8 BOM).
-
-## Roadmap (step by step)
-
-1. Domain: `Vehicle` (plate, make, model, manufacture date), `Rental` (person), invariants (age ≤ 5 years, one active rental per person).
-2. ApplicationCore: use cases `CreateVehicle`, `ListVehicles`, `RentVehicle`, `ReturnVehicle` + inputs/outputs/ports; wire in `AddUseCases`.
-3. Infrastructure: Mongo entities/collections, `VehicleRepository`, `EntityFactory`, `UnitOfWork`; wire in `AddBaseInfrastructure`.
-4. Api: `VehiclesController` endpoints, MediatR requests/handlers, presenters, view models.
-5. Tests: one unit, one functional, one infrastructure (per task spec).
-6. Verify: `dotnet test src/microservice.sln --configuration Release` green; `docker-compose up --build` + swagger smoke test.
 
 ## Workflow
 
