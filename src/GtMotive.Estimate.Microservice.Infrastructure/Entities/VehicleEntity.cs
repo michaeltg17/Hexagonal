@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using GtMotive.Estimate.Microservice.Domain.Vehicles;
-using GtMotive.Estimate.Microservice.Domain.Vehicles.Interfaces;
+﻿using GtMotive.Estimate.Microservice.Domain.Vehicles;
 using GtMotive.Estimate.Microservice.Domain.Vehicles.ValueObjects;
 
 namespace GtMotive.Estimate.Microservice.Infrastructure.Entities
@@ -37,22 +35,18 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.Entities
         /// <param name="make">Make.</param>
         /// <param name="model">Model.</param>
         /// <param name="manufactureDate">Manufacture date.</param>
-        /// <param name="rentals">Rentals of the vehicle.</param>
+        /// <param name="activeRentalId">Identifier of the active rental, if the vehicle is rented.</param>
         internal VehicleEntity(
             VehicleId id,
             Plate plate,
             Make make,
             Model model,
             ManufactureDate manufactureDate,
-            IEnumerable<IRental> rentals)
+            RentalId? activeRentalId)
             : base(plate, make, model, manufactureDate)
         {
             Id = id;
-
-            foreach (var rental in rentals)
-            {
-                Rentals.Add(rental);
-            }
+            ActiveRentalId = activeRentalId;
         }
     }
 }

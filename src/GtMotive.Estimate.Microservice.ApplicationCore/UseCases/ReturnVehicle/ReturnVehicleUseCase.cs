@@ -67,6 +67,10 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.ReturnVehicle
             {
                 _outputPort.ConflictHandle(ex.Message);
             }
+            catch (RentalAlreadyReturnedException ex)
+            {
+                _outputPort.ConflictHandle(ex.Message);
+            }
             catch (VehicleConcurrencyException ex)
             {
                 _outputPort.ConflictHandle(ex.Message);

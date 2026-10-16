@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 
 namespace GtMotive.Estimate.Microservice.Infrastructure.MongoDb.Entities
 {
     /// <summary>
     /// Mongo document of the vehicle aggregate.
     /// </summary>
-    [SuppressMessage("Design", "CA1002:Do not expose generic lists", Justification = "Bson documents map naturally to a list of rentals.")]
-    [SuppressMessage("Design", "CA2227:Collection properties should be read only", Justification = "Bson deserialization requires a settable collection.")]
     public class VehicleDocument
     {
         /// <summary>
@@ -37,9 +33,9 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.MongoDb.Entities
         public DateTime ManufactureDate { get; set; }
 
         /// <summary>
-        /// Gets or sets the rentals of the vehicle.
+        /// Gets or sets the identifier of the active rental, if the vehicle is rented.
         /// </summary>
-        public List<RentalDocument> Rentals { get; set; } = [];
+        public Guid? ActiveRentalId { get; set; }
 
         /// <summary>
         /// Gets or sets the optimistic concurrency version of the document.

@@ -1,4 +1,5 @@
 ﻿using System;
+using GtMotive.Estimate.Microservice.Domain.Vehicles.Exceptions;
 using GtMotive.Estimate.Microservice.Domain.Vehicles.Interfaces;
 using GtMotive.Estimate.Microservice.Domain.Vehicles.ValueObjects;
 
@@ -14,7 +15,6 @@ namespace GtMotive.Estimate.Microservice.Domain.Vehicles
         /// </summary>
         protected Vehicle()
         {
-            Rentals = new RentalCollection();
         }
 
         /// <summary>
@@ -60,14 +60,14 @@ namespace GtMotive.Estimate.Microservice.Domain.Vehicles
         public ManufactureDate ManufactureDate { get; protected set; }
 
         /// <summary>
-        /// Gets or sets the rentals of the vehicle.
+        /// Gets or sets the identifier of the active rental, if the vehicle is rented.
         /// </summary>
-        public RentalCollection Rentals { get; protected set; }
+        public RentalId? ActiveRentalId { get; protected set; }
 
         /// <summary>
         /// Gets a value indicating whether the vehicle is available.
         /// </summary>
-        public bool IsAvailable => !Rentals.HasActiveRental();
+        public bool IsAvailable => ActiveRentalId is null;
 
         /// <summary>
         /// Rents the vehicle to a client.
@@ -80,9 +80,14 @@ namespace GtMotive.Estimate.Microservice.Domain.Vehicles
         {
             ArgumentNullException.ThrowIfNull(rentalFactory);
 
+            if (ActiveRentalId is not null)
+            {
+                throw new VehicleAlreadyRentedException("The vehicle is already rented.");
+            }
+
             var rental = rentalFactory.NewRental(Id, client);
             rental.Rent(rentDate);
-            Rentals.Add(rental);
+            ActiveRentalId = rental.Id;
 
             return rental;
         }
@@ -90,11 +95,22 @@ namespace GtMotive.Estimate.Microservice.Domain.Vehicles
         /// <summary>
         /// Returns the vehicle.
         /// </summary>
+        /// <param name="activeRental">The active rental of the vehicle.</param>
         /// <param name="returnDate">Return date.</param>
         /// <returns>The returned rental.</returns>
-        public IRental Return(DateTime returnDate)
+        public IRental Return(IRental activeRental, DateTime returnDate)
         {
-            return Rentals.ReturnActive(returnDate);
+            ArgumentNullException.ThrowIfNull(activeRental);
+
+            if (activeRental.Id != ActiveRentalId)
+            {
+                throw new VehicleNotRentedException("The vehicle is not rented.");
+            }
+
+            activeRental.Return(returnDate);
+            ActiveRentalId = null;
+
+            return activeRental;
         }
     }
 }

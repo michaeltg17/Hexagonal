@@ -77,7 +77,15 @@ namespace GtMotive.Estimate.Microservice.Domain.Vehicles
         {
             ArgumentNullException.ThrowIfNull(vehicle);
 
-            var rental = vehicle.Return(DateTime.UtcNow);
+            if (vehicle.ActiveRentalId is null)
+            {
+                throw new VehicleNotRentedException("The vehicle is not rented.");
+            }
+
+            var rental = await _vehicleRepository.GetRentalById(vehicle.ActiveRentalId.Value)
+                ?? throw new VehicleNotRentedException("The vehicle is not rented.");
+
+            vehicle.Return(rental, DateTime.UtcNow);
             await _vehicleRepository.Update(vehicle);
             await _vehicleRepository.UpdateRental(rental);
         }
