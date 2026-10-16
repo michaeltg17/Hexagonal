@@ -43,13 +43,13 @@ namespace GtMotive.Estimate.Microservice.Domain.Vehicles
         bool IsAvailable { get; }
 
         /// <summary>
-        /// Rents the vehicle to a person.
+        /// Rents the vehicle to a client.
         /// </summary>
         /// <param name="rentalFactory">Rental factory.</param>
-        /// <param name="person">Person that rents the vehicle.</param>
+        /// <param name="client">Client that rents the vehicle.</param>
         /// <param name="rentDate">Rent date.</param>
         /// <returns>The created rental.</returns>
-        IRental Rent(IRentalFactory rentalFactory, Person person, DateTime rentDate);
+        IRental Rent(IRentalFactory rentalFactory, Client client, DateTime rentDate);
 
         /// <summary>
         /// Returns the active rental of the vehicle.

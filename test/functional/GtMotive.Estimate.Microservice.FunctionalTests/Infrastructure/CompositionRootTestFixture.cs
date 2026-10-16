@@ -1,14 +1,19 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 using DotNet.Testcontainers.Builders;
 using GtMotive.Estimate.Microservice.Api;
 using GtMotive.Estimate.Microservice.Infrastructure;
 using GtMotive.Estimate.Microservice.Infrastructure.MongoDb;
+using GtMotive.Estimate.Microservice.Infrastructure.MongoDb.Entities;
 using GtMotive.Estimate.Microservice.Infrastructure.MongoDb.Settings;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Bson;
+using MongoDB.Bson.IO;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using Testcontainers.MongoDb;
 using Xunit;
@@ -42,6 +47,31 @@ namespace GtMotive.Estimate.Microservice.FunctionalTests.Infrastructure
         }
 
         public IConfiguration Configuration { get; private set; }
+
+        /// <summary>
+        /// Serializes a Guid in the same format the application persists identifiers.
+        /// </summary>
+        /// <param name="value">Guid value.</param>
+        /// <returns>The Guid as a BSON value.</returns>
+        public static BsonValue SerializeGuid(Guid value)
+        {
+            using var stream = new MemoryStream();
+
+            using (var writer = new BsonBinaryWriter(stream))
+            {
+                writer.WriteStartDocument();
+                writer.WriteName("Value");
+                BsonSerializer.Serialize<Guid>(writer, value);
+                writer.WriteEndDocument();
+
+                stream.Position = 0;
+            }
+
+            using var reader = new BsonBinaryReader(stream);
+            var document = BsonSerializer.Deserialize<BsonDocument>(reader);
+
+            return document["Value"];
+        }
 
         public async Task InitializeAsync()
         {
@@ -120,6 +150,90 @@ namespace GtMotive.Estimate.Microservice.FunctionalTests.Infrastructure
             await database.DropCollectionAsync(VehiclesCollectionName);
             await database.DropCollectionAsync(RentalsCollectionName);
             await initializer.InitializeAsync();
+        }
+
+        /// <summary>
+        /// Counts the rentals that have not been returned yet.
+        /// </summary>
+        /// <returns>The number of active rentals.</returns>
+        public async Task<int> CountActiveRentalsAsync()
+        {
+            using var scope = _serviceProvider.CreateScope();
+            var database = scope.ServiceProvider.GetRequiredService<IMongoDatabase>();
+
+            return (int)await database
+                .GetCollection<RentalDocument>(RentalsCollectionName)
+                .CountDocumentsAsync(rental => rental.ReturnDate == null);
+        }
+
+        /// <summary>
+        /// Counts all the persisted rentals.
+        /// </summary>
+        /// <returns>The number of rentals.</returns>
+        public async Task<int> CountRentalsAsync()
+        {
+            using var scope = _serviceProvider.CreateScope();
+            var database = scope.ServiceProvider.GetRequiredService<IMongoDatabase>();
+
+            return (int)await database
+                .GetCollection<RentalDocument>(RentalsCollectionName)
+                .CountDocumentsAsync(FilterDefinition<RentalDocument>.Empty);
+        }
+
+        /// <summary>
+        /// Gets the concurrency version of a vehicle document.
+        /// </summary>
+        /// <param name="vehicleId">Vehicle identifier.</param>
+        /// <returns>The vehicle version or 0 if the vehicle does not exist.</returns>
+        public async Task<long> GetVehicleVersionAsync(Guid vehicleId)
+        {
+            using var scope = _serviceProvider.CreateScope();
+            var database = scope.ServiceProvider.GetRequiredService<IMongoDatabase>();
+
+            var document = await database
+                .GetCollection<VehicleDocument>(VehiclesCollectionName)
+                .Find(vehicle => vehicle.Id == vehicleId)
+                .FirstOrDefaultAsync();
+
+            return document?.Version ?? 0;
+        }
+
+        /// <summary>
+        /// Runs the Mongo database initializer again against the current database.
+        /// </summary>
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        public Task InitializeDatabaseAsync()
+        {
+            using var scope = _serviceProvider.CreateScope();
+            var initializer = scope.ServiceProvider.GetRequiredService<MongoDbInitializer>();
+
+            return initializer.InitializeAsync();
+        }
+
+        /// <summary>
+        /// Inserts a raw rental document, bypassing the application mapping.
+        /// </summary>
+        /// <param name="document">Rental document.</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        public async Task InsertRentalDocumentAsync(BsonDocument document)
+        {
+            using var scope = _serviceProvider.CreateScope();
+            var database = scope.ServiceProvider.GetRequiredService<IMongoDatabase>();
+
+            await database.GetCollection<BsonDocument>(RentalsCollectionName).InsertOneAsync(document);
+        }
+
+        /// <summary>
+        /// Drops a rentals collection index by name.
+        /// </summary>
+        /// <param name="indexName">Index name.</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        public async Task DropRentalIndexAsync(string indexName)
+        {
+            using var scope = _serviceProvider.CreateScope();
+            var database = scope.ServiceProvider.GetRequiredService<IMongoDatabase>();
+
+            await database.GetCollection<BsonDocument>(RentalsCollectionName).Indexes.DropOneAsync(indexName);
         }
 
         private static void ConfigureServices(IServiceCollection services, string mongoConnectionString)

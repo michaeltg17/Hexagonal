@@ -8,9 +8,9 @@ namespace GtMotive.Estimate.Microservice.Api.ViewModels
     public sealed record RentVehicleViewModel
     {
         /// <summary>
-        /// Gets or sets the person that rents the vehicle.
+        /// Gets or sets the e-mail that identifies the client that rents the vehicle.
         /// </summary>
         [Required]
-        public string Person { get; set; }
+        public string ClientEmail { get; set; }
     }
 }

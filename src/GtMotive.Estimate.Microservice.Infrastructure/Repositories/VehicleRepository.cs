@@ -14,6 +14,12 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.Repositories
     /// <summary>
     /// Mongo implementation of the vehicle repository.
     /// </summary>
+    /// <remarks>
+    /// The repository is registered as scoped, so each unit of work gets its own instance: the
+    /// pending changes and the loaded versions are never shared between requests. A vehicle must
+    /// be loaded through this instance before one of its updates is queued, so that the update
+    /// can be filtered by the version that was read.
+    /// </remarks>
     public sealed class VehicleRepository : IVehicleRepository
     {
         private const int DuplicateKeyErrorCode = 11000;
@@ -22,20 +28,6 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.Repositories
 
         private static readonly ReplaceOptions NoUpsertReplaceOptions = new() { IsUpsert = false };
 
-        private static readonly HashSet<int> TransientTransactionErrorCodes =
-        [
-            26, // LockContention.
-            112, // CastError.
-            136, // CappedPositionLost.
-            150, // MaxTimeMSExpired.
-            189, // TransactionAborted.
-            251, // ExceededTimeQuota.
-            262, // UserNotFound.
-            263, // PrimarySteppedDown.
-            11602, // StaleEpoch.
-            43494, // StaleDbVersion.
-        ];
-
         private readonly IMongoCollection<VehicleDocument> _vehicles;
         private readonly IMongoCollection<RentalDocument> _rentals;
         private readonly ConcurrentDictionary<Guid, long> _loadedVersions = new();
@@ -43,6 +35,7 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.Repositories
         private readonly List<IVehicle> _toUpdate = [];
         private readonly List<IRental> _rentalsToInsert = [];
         private readonly List<IRental> _rentalsToUpdate = [];
+        private SaveOutcome? _lastSaveOutcome;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="VehicleRepository"/> class.
@@ -167,14 +160,14 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.Repositories
         }
 
         /// <summary>
-        /// Gets a value indicating whether a person has an active rental in the fleet.
+        /// Gets a value indicating whether a client has an active rental in the fleet.
         /// </summary>
-        /// <param name="person">Person to check.</param>
-        /// <returns>Whether the person has an active rental.</returns>
-        public async Task<bool> PersonHasActiveRental(Person person)
+        /// <param name="client">Client to check.</param>
+        /// <returns>Whether the client has an active rental.</returns>
+        public async Task<bool> ClientHasActiveRental(Client client)
         {
             var count = await _rentals.CountDocumentsAsync(
-                rental => rental.Person == person.Value && rental.ReturnDate == null);
+                rental => rental.Client == client.Value && rental.ReturnDate == null);
 
             return count > 0;
         }
@@ -183,7 +176,7 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.Repositories
         /// Gets a value indicating whether a vehicle with the plate already exists in the fleet.
         /// </summary>
         /// <param name="plate">Plate to check.</param>
-        /// <returns>Whether the plate already exists in the fleet.</returns>
+        /// <returns>Whether the plate already exists.</returns>
         public async Task<bool> ExistsByPlate(Plate plate)
         {
             var count = await _vehicles.CountDocumentsAsync(vehicle => vehicle.Plate == plate.Value);
@@ -194,18 +187,73 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.Repositories
         /// <summary>
         /// Persists all the pending changes.
         /// </summary>
+        /// <remarks>
+        /// The pending changes are kept after a failed save so the caller can replay them in a
+        /// new transaction; they are only cleared once every write has been accepted.
+        /// </remarks>
         /// <returns>The number of persisted changes.</returns>
-        internal async Task<int> SaveChanges()
+        internal Task<int> SaveChanges()
         {
-            try
+            return SaveChangesCoreAsync();
+        }
+
+        /// <summary>
+        /// Verifies against the database whether every change of the last save was applied.
+        /// </summary>
+        /// <remarks>
+        /// Used to resolve ambiguous transaction commit results, where the commit may or may not
+        /// have reached the server. Because the save is atomic, either every change is applied
+        /// or none is.
+        /// </remarks>
+        /// <returns>Whether every change of the last save is present in the database.</returns>
+        internal async Task<bool> VerifyLastSaveOutcomeAsync()
+        {
+            var outcome = _lastSaveOutcome;
+
+            if (outcome is null)
             {
-                return await SaveChangesCoreAsync();
+                return false;
             }
-            catch (MongoCommandException ex) when (TransientTransactionErrorCodes.Contains(ex.Code))
+
+            foreach (var vehicleId in outcome.VehicleInserts)
             {
-                throw new VehicleConcurrencyException(
-                    "The vehicle was modified by another operation. Please try again.");
+                if (await _vehicles.CountDocumentsAsync(vehicle => vehicle.Id == vehicleId) == 0)
+                {
+                    return false;
+                }
             }
+
+            foreach (var update in outcome.VehicleUpdates)
+            {
+                var count = await _vehicles.CountDocumentsAsync(
+                    vehicle => vehicle.Id == update.Id && vehicle.Version == update.Version);
+
+                if (count == 0)
+                {
+                    return false;
+                }
+            }
+
+            foreach (var rentalId in outcome.RentalInserts)
+            {
+                if (await _rentals.CountDocumentsAsync(rental => rental.Id == rentalId) == 0)
+                {
+                    return false;
+                }
+            }
+
+            foreach (var update in outcome.RentalUpdates)
+            {
+                var count = await _rentals.CountDocumentsAsync(
+                    rental => rental.Id == update.Id && rental.ReturnDate == update.ReturnDate);
+
+                if (count == 0)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         private static VehicleDocument MapToDocument(IVehicle vehicle, long version)
@@ -228,7 +276,7 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.Repositories
             {
                 Id = rental.Id.ToGuid(),
                 VehicleId = rental.VehicleId.ToGuid(),
-                Person = rental.Person.Value,
+                Client = rental.Client.Value,
                 RentDate = rental.RentDate,
                 ReturnDate = rental.ReturnDate,
             };
@@ -240,7 +288,7 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.Repositories
                 .Select(rental => new RentalEntity(
                     new RentalId(rental.Id),
                     new VehicleId(rental.VehicleId),
-                    new Person(rental.Person),
+                    new Client(rental.Client),
                     rental.RentDate,
                     rental.ReturnDate))
                 .ToList();
@@ -256,6 +304,7 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.Repositories
 
         private async Task<int> SaveChangesCoreAsync()
         {
+            var outcome = new SaveOutcome();
             var saved = 0;
 
             foreach (var vehicle in _toInsert)
@@ -266,10 +315,12 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.Repositories
                 }
                 catch (MongoWriteException ex) when (ex.WriteError.Code == DuplicateKeyErrorCode)
                 {
+                    // The unique vehicles.Plate index is the authoritative backstop for duplicate plates.
                     throw new VehicleAlreadyExistsException(
                         $"The vehicle with plate {vehicle.Plate} already exists in the fleet.");
                 }
 
+                outcome.VehicleInserts.Add(vehicle.Id.ToGuid());
                 saved++;
             }
 
@@ -279,6 +330,9 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.Repositories
                     ? version
                     : 1;
 
+                // A missing vehicle and a stale version both surface as a zero match count. The service
+                // exposes no delete operation, so both mean a concurrent operation won the race and the
+                // caller is asked to refresh its state and try again.
                 var filter = Builders<VehicleDocument>.Filter.Eq("Id", vehicle.Id.ToGuid())
                     & Builders<VehicleDocument>.Filter.Eq("Version", expectedVersion);
 
@@ -291,6 +345,7 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.Repositories
                 }
 
                 _loadedVersions[vehicle.Id.ToGuid()] = expectedVersion + 1;
+                outcome.VehicleUpdates.Add(new PendingVehicleUpdate(vehicle.Id.ToGuid(), expectedVersion + 1));
                 saved++;
             }
 
@@ -302,9 +357,12 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.Repositories
                 }
                 catch (MongoWriteException ex) when (ex.WriteError.Code == DuplicateKeyErrorCode)
                 {
-                    throw new PersonAlreadyHasActiveRentalException("The person already has an active rental.");
+                    // The unique rentals.Client partial index (active rentals only) is the authoritative
+                    // backstop for one active rental per client.
+                    throw new ClientAlreadyHasActiveRentalException("The client already has an active rental.");
                 }
 
+                outcome.RentalInserts.Add(rental.Id.ToGuid());
                 saved++;
             }
 
@@ -314,8 +372,11 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.Repositories
                 var update = Builders<RentalDocument>.Update.Set(document => document.ReturnDate, rental.ReturnDate);
                 await UpdateRentalAsync(filter, update);
 
+                outcome.RentalUpdates.Add(new PendingRentalUpdate(rental.Id.ToGuid(), rental.ReturnDate));
                 saved++;
             }
+
+            _lastSaveOutcome = outcome;
 
             _toInsert.Clear();
             _toUpdate.Clear();
@@ -379,5 +440,45 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.Repositories
                 await _rentals.UpdateOneAsync(Session, filter, update);
             }
         }
+
+        /// <summary>
+        /// Snapshot of the changes persisted by the last save, used to verify ambiguous transaction commits.
+        /// </summary>
+        private sealed class SaveOutcome
+        {
+            /// <summary>
+            /// Gets the identifiers of the inserted vehicles.
+            /// </summary>
+            public List<Guid> VehicleInserts { get; } = [];
+
+            /// <summary>
+            /// Gets the vehicles replaced with a new version.
+            /// </summary>
+            public List<PendingVehicleUpdate> VehicleUpdates { get; } = [];
+
+            /// <summary>
+            /// Gets the identifiers of the inserted rentals.
+            /// </summary>
+            public List<Guid> RentalInserts { get; } = [];
+
+            /// <summary>
+            /// Gets the rentals updated with a new return date.
+            /// </summary>
+            public List<PendingRentalUpdate> RentalUpdates { get; } = [];
+        }
+
+        /// <summary>
+        /// Vehicle update persisted with the given version.
+        /// </summary>
+        /// <param name="Id">Vehicle identifier.</param>
+        /// <param name="Version">Version written by the save.</param>
+        private sealed record PendingVehicleUpdate(Guid Id, long Version);
+
+        /// <summary>
+        /// Rental update persisted with the given return date.
+        /// </summary>
+        /// <param name="Id">Rental identifier.</param>
+        /// <param name="ReturnDate">Return date written by the save.</param>
+        private sealed record PendingRentalUpdate(Guid Id, DateTime? ReturnDate);
     }
 }

@@ -25,11 +25,11 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.Factories
         /// Creates a new rental.
         /// </summary>
         /// <param name="vehicleId">Vehicle identifier.</param>
-        /// <param name="person">Person that rents the vehicle.</param>
+        /// <param name="client">Client that rents the vehicle.</param>
         /// <returns>The new rental.</returns>
-        public IRental NewRental(VehicleId vehicleId, Person person)
+        public IRental NewRental(VehicleId vehicleId, Client client)
         {
-            return new RentalEntity(vehicleId, person);
+            return new RentalEntity(vehicleId, client);
         }
     }
 }

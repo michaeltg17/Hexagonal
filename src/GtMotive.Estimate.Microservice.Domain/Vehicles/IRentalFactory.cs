@@ -9,8 +9,8 @@
         /// Creates a new rental.
         /// </summary>
         /// <param name="vehicleId">Vehicle identifier.</param>
-        /// <param name="person">Person that rents the vehicle.</param>
+        /// <param name="client">Client that rents the vehicle.</param>
         /// <returns>The new rental.</returns>
-        IRental NewRental(VehicleId vehicleId, Person person);
+        IRental NewRental(VehicleId vehicleId, Client client);
     }
 }
