@@ -37,6 +37,7 @@ namespace GtMotive.Estimate.Microservice.Infrastructure
 
             services.AddSingleton<MongoService>();
             services.AddSingleton<IMongoClient>(sp => sp.GetRequiredService<MongoService>().MongoClient);
+            services.AddSingleton<MongoDbInitializer>();
             services.AddScoped<IMongoDatabase>(sp => sp.GetRequiredService<IMongoClient>()
                 .GetDatabase(sp.GetRequiredService<IOptions<MongoDbSettings>>().Value.MongoDbDatabaseName));
 

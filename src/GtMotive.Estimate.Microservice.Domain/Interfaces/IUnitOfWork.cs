@@ -12,5 +12,11 @@ namespace GtMotive.Estimate.Microservice.Domain.Interfaces
         /// </summary>
         /// <returns>Number of affected rows.</returns>
         Task<int> Save();
+
+        /// <summary>
+        /// Applies all database changes in a single transaction.
+        /// </summary>
+        /// <returns>Number of affected rows.</returns>
+        Task<int> SaveInTransaction();
     }
 }

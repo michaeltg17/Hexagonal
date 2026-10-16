@@ -40,5 +40,10 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.MongoDb.Entities
         /// Gets or sets the rentals of the vehicle.
         /// </summary>
         public List<RentalDocument> Rentals { get; set; } = [];
+
+        /// <summary>
+        /// Gets or sets the optimistic concurrency version of the document.
+        /// </summary>
+        public long Version { get; set; }
     }
 }

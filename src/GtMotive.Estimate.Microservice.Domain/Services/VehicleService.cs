@@ -69,6 +69,7 @@ namespace GtMotive.Estimate.Microservice.Domain.Services
 
             var rental = vehicle.Rent(_rentalFactory, person, DateTime.UtcNow);
             await _vehicleRepository.Update(vehicle);
+            await _vehicleRepository.AddRental(rental);
 
             return rental;
         }
@@ -82,8 +83,9 @@ namespace GtMotive.Estimate.Microservice.Domain.Services
         {
             ArgumentNullException.ThrowIfNull(vehicle);
 
-            vehicle.Return(DateTime.UtcNow);
+            var rental = vehicle.Return(DateTime.UtcNow);
             await _vehicleRepository.Update(vehicle);
+            await _vehicleRepository.UpdateRental(rental);
         }
     }
 }

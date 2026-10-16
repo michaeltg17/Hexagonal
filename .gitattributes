@@ -1,8 +1,3 @@
-* text=auto eol=lf
-*.cs eol=lf
-*.json eol=lf
-*.yml eol=lf
-*.yaml eol=lf
-*.md eol=lf
-*.txt eol=lf
+* text=auto eol=crlf
+*.sh text eol=lf
 *.kdbx binary

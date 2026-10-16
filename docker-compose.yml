@@ -3,6 +3,7 @@ services:
     image: mongo:8
     container_name: mongodb
     restart: always
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
     ports:
       - "27017:27017"
     volumes:
@@ -15,6 +16,29 @@ services:
     networks:
       - app-network
 
+  mongodb-init:
+    image: mongo:8
+    container_name: mongodb-init
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    entrypoint:
+      - mongosh
+      - mongodb:27017
+      - --quiet
+      - --eval
+      - |
+        try {
+          rs.status();
+        } catch (e) {
+          rs.initiate({ _id: "rs0", members: [{ _id: 0, host: "mongodb:27017" }] });
+        }
+        while (!db.hello().isWritablePrimary) {
+          sleep(1000);
+        }
+    networks:
+      - app-network
+
   api:
     container_name: api
     build:
@@ -23,6 +47,8 @@ services:
     depends_on:
       mongodb:
         condition: service_healthy
+      mongodb-init:
+        condition: service_completed_successfully
     ports:
       - "8080:8080"
     environment:

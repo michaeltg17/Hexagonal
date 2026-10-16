@@ -37,6 +37,20 @@ namespace GtMotive.Estimate.Microservice.Domain.Vehicles
         Task Update(IVehicle vehicle);
 
         /// <summary>
+        /// Queues a new rental for persistence.
+        /// </summary>
+        /// <param name="rental">Rental to add.</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        Task AddRental(IRental rental);
+
+        /// <summary>
+        /// Queues an updated rental for persistence.
+        /// </summary>
+        /// <param name="rental">Rental to update.</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        Task UpdateRental(IRental rental);
+
+        /// <summary>
         /// Gets a value indicating whether a person has an active rental in the fleet.
         /// </summary>
         /// <param name="person">Person to check.</param>
