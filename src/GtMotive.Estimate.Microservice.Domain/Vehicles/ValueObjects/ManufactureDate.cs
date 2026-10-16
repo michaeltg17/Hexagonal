@@ -1,7 +1,7 @@
 ﻿using System;
-using GtMotive.Estimate.Microservice.Domain.Exceptions;
+using GtMotive.Estimate.Microservice.Domain.Vehicles.Exceptions;
 
-namespace GtMotive.Estimate.Microservice.Domain.Vehicles
+namespace GtMotive.Estimate.Microservice.Domain.Vehicles.ValueObjects
 {
     /// <summary>
     /// Value object that represents the manufacture date of a vehicle.

@@ -1,7 +1,8 @@
 ﻿using System;
 using FluentAssertions;
-using GtMotive.Estimate.Microservice.Domain.Exceptions;
 using GtMotive.Estimate.Microservice.Domain.Vehicles;
+using GtMotive.Estimate.Microservice.Domain.Vehicles.Exceptions;
+using GtMotive.Estimate.Microservice.Domain.Vehicles.Interfaces;
 using Moq;
 using Xunit;
 

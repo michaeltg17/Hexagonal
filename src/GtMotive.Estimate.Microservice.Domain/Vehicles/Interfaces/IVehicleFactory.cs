@@ -1,4 +1,6 @@
-﻿namespace GtMotive.Estimate.Microservice.Domain.Vehicles
+﻿using GtMotive.Estimate.Microservice.Domain.Vehicles.ValueObjects;
+
+namespace GtMotive.Estimate.Microservice.Domain.Vehicles.Interfaces
 {
     /// <summary>
     /// Factory contract for vehicles.

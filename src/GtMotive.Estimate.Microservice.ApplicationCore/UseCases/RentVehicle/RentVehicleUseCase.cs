@@ -1,41 +1,34 @@
 ﻿using System;
 using System.Threading.Tasks;
 using GtMotive.Estimate.Microservice.Domain;
-using GtMotive.Estimate.Microservice.Domain.Exceptions;
 using GtMotive.Estimate.Microservice.Domain.Interfaces;
-using GtMotive.Estimate.Microservice.Domain.Services;
 using GtMotive.Estimate.Microservice.Domain.Vehicles;
+using GtMotive.Estimate.Microservice.Domain.Vehicles.Exceptions;
+using GtMotive.Estimate.Microservice.Domain.Vehicles.Interfaces;
+using GtMotive.Estimate.Microservice.Domain.Vehicles.ValueObjects;
 
 namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.RentVehicle
 {
     /// <summary>
     /// Use case that rents a vehicle to a person.
     /// </summary>
-    public sealed class RentVehicleUseCase : IUseCase<RentVehicleInput>
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="RentVehicleUseCase"/> class.
+    /// </remarks>
+    /// <param name="vehicleRepository">Vehicle repository.</param>
+    /// <param name="vehicleService">Vehicle domain service.</param>
+    /// <param name="unitOfWork">Unit of work.</param>
+    /// <param name="outputPort">Output port.</param>
+    public sealed class RentVehicleUseCase(
+        IVehicleRepository vehicleRepository,
+        VehicleService vehicleService,
+        IUnitOfWork unitOfWork,
+        IRentVehicleOutputPort outputPort) : IUseCase<RentVehicleInput>
     {
-        private readonly IVehicleRepository _vehicleRepository;
-        private readonly VehicleService _vehicleService;
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IRentVehicleOutputPort _outputPort;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RentVehicleUseCase"/> class.
-        /// </summary>
-        /// <param name="vehicleRepository">Vehicle repository.</param>
-        /// <param name="vehicleService">Vehicle domain service.</param>
-        /// <param name="unitOfWork">Unit of work.</param>
-        /// <param name="outputPort">Output port.</param>
-        public RentVehicleUseCase(
-            IVehicleRepository vehicleRepository,
-            VehicleService vehicleService,
-            IUnitOfWork unitOfWork,
-            IRentVehicleOutputPort outputPort)
-        {
-            _vehicleRepository = vehicleRepository ?? throw new ArgumentNullException(nameof(vehicleRepository));
-            _vehicleService = vehicleService ?? throw new ArgumentNullException(nameof(vehicleService));
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-            _outputPort = outputPort ?? throw new ArgumentNullException(nameof(outputPort));
-        }
+        private readonly IVehicleRepository _vehicleRepository = vehicleRepository ?? throw new ArgumentNullException(nameof(vehicleRepository));
+        private readonly VehicleService _vehicleService = vehicleService ?? throw new ArgumentNullException(nameof(vehicleService));
+        private readonly IUnitOfWork _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        private readonly IRentVehicleOutputPort _outputPort = outputPort ?? throw new ArgumentNullException(nameof(outputPort));
 
         /// <summary>
         /// Executes the use case.

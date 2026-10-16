@@ -10,21 +10,15 @@ namespace GtMotive.Estimate.Microservice.Api.UseCases.CreateVehicle
     /// <summary>
     /// MediatR handler of the create vehicle use case.
     /// </summary>
-    public sealed class CreateVehicleHandler : IRequestHandler<CreateVehicleRequest, IWebApiPresenter>
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="CreateVehicleHandler"/> class.
+    /// </remarks>
+    /// <param name="createVehicleUseCase">Create vehicle use case.</param>
+    /// <param name="presenter">Web API presenter.</param>
+    public sealed class CreateVehicleHandler(IUseCase<CreateVehicleInput> createVehicleUseCase, CreateVehiclePresenter presenter) : IRequestHandler<CreateVehicleRequest, IWebApiPresenter>
     {
-        private readonly IUseCase<CreateVehicleInput> _createVehicleUseCase;
-        private readonly CreateVehiclePresenter _presenter;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CreateVehicleHandler"/> class.
-        /// </summary>
-        /// <param name="createVehicleUseCase">Create vehicle use case.</param>
-        /// <param name="presenter">Web API presenter.</param>
-        public CreateVehicleHandler(IUseCase<CreateVehicleInput> createVehicleUseCase, CreateVehiclePresenter presenter)
-        {
-            _createVehicleUseCase = createVehicleUseCase ?? throw new ArgumentNullException(nameof(createVehicleUseCase));
-            _presenter = presenter ?? throw new ArgumentNullException(nameof(presenter));
-        }
+        private readonly IUseCase<CreateVehicleInput> _createVehicleUseCase = createVehicleUseCase ?? throw new ArgumentNullException(nameof(createVehicleUseCase));
+        private readonly CreateVehiclePresenter _presenter = presenter ?? throw new ArgumentNullException(nameof(presenter));
 
         /// <summary>
         /// Handles the request.

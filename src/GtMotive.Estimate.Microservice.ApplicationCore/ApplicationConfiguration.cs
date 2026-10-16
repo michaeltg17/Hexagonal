@@ -6,7 +6,7 @@ using GtMotive.Estimate.Microservice.ApplicationCore.UseCases.GetVehicle;
 using GtMotive.Estimate.Microservice.ApplicationCore.UseCases.ListVehicles;
 using GtMotive.Estimate.Microservice.ApplicationCore.UseCases.RentVehicle;
 using GtMotive.Estimate.Microservice.ApplicationCore.UseCases.ReturnVehicle;
-using GtMotive.Estimate.Microservice.Domain.Services;
+using GtMotive.Estimate.Microservice.Domain.Vehicles;
 using Microsoft.Extensions.DependencyInjection;
 
 [assembly: CLSCompliant(false)]
