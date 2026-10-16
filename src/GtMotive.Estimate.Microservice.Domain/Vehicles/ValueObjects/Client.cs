@@ -41,6 +41,15 @@ namespace GtMotive.Estimate.Microservice.Domain.Vehicles.ValueObjects
         /// </summary>
         public string Value { get; }
 
+        /// <summary>
+        /// Returns the client e-mail as a string.
+        /// </summary>
+        /// <returns>The client e-mail.</returns>
+        public override string ToString()
+        {
+            return Value;
+        }
+
         [GeneratedRegex("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", RegexOptions.CultureInvariant)]
         private static partial Regex EmailPattern();
     }
