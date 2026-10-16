@@ -78,7 +78,7 @@ namespace GtMotive.Estimate.Microservice.FunctionalTests.Specs
             var vehicle = await CreateVehicleAsync(UniquePlate());
 
             // When
-            var actionResult = await RentAsync(vehicle, UniquePerson());
+            var actionResult = await RentAsync(vehicle, UniqueClientEmail());
 
             // Then
             var result = actionResult.Should().BeAssignableTo<OkObjectResult>().Subject;
@@ -86,17 +86,17 @@ namespace GtMotive.Estimate.Microservice.FunctionalTests.Specs
         }
 
         [Fact]
-        public async Task RentVehicle_WhenPersonAlreadyHasActiveRental_ReturnsConflict()
+        public async Task RentVehicle_WhenClientAlreadyHasActiveRental_ReturnsConflict()
         {
             // Given
             var firstVehicle = await CreateVehicleAsync(UniquePlate());
             var secondVehicle = await CreateVehicleAsync(UniquePlate());
-            var person = UniquePerson();
+            var clientEmail = UniqueClientEmail();
 
-            (await RentAsync(firstVehicle, person)).Should().BeAssignableTo<OkObjectResult>();
+            (await RentAsync(firstVehicle, clientEmail)).Should().BeAssignableTo<OkObjectResult>();
 
             // When
-            var actionResult = await RentAsync(secondVehicle, person);
+            var actionResult = await RentAsync(secondVehicle, clientEmail);
 
             // Then
             actionResult.Should().BeAssignableTo<ConflictObjectResult>();
@@ -107,7 +107,7 @@ namespace GtMotive.Estimate.Microservice.FunctionalTests.Specs
         {
             // When
             var actionResult = await SendAsync(
-                new RentVehicleRequest(UnknownVehicleId, new RentVehicleViewModel { Person = UniquePerson() }));
+                new RentVehicleRequest(UnknownVehicleId, new RentVehicleViewModel { ClientEmail = UniqueClientEmail() }));
 
             // Then
             actionResult.Should().BeAssignableTo<NotFoundObjectResult>();
@@ -119,7 +119,7 @@ namespace GtMotive.Estimate.Microservice.FunctionalTests.Specs
             // Given
             var vehicle = await CreateVehicleAsync(UniquePlate());
 
-            (await RentAsync(vehicle, UniquePerson())).Should().BeAssignableTo<OkObjectResult>();
+            (await RentAsync(vehicle, UniqueClientEmail())).Should().BeAssignableTo<OkObjectResult>();
 
             // When
             var actionResult = await ReturnAsync(vehicle);
@@ -149,7 +149,7 @@ namespace GtMotive.Estimate.Microservice.FunctionalTests.Specs
             var availableVehicle = await CreateVehicleAsync(UniquePlate());
             var rentedVehicle = await CreateVehicleAsync(UniquePlate());
 
-            (await RentAsync(rentedVehicle, UniquePerson())).Should().BeAssignableTo<OkObjectResult>();
+            (await RentAsync(rentedVehicle, UniqueClientEmail())).Should().BeAssignableTo<OkObjectResult>();
 
             // When
             var actionResult = await SendAsync(new ListVehiclesRequest(default));
@@ -168,7 +168,7 @@ namespace GtMotive.Estimate.Microservice.FunctionalTests.Specs
             var availableVehicle = await CreateVehicleAsync(UniquePlate());
             var rentedVehicle = await CreateVehicleAsync(UniquePlate());
 
-            (await RentAsync(rentedVehicle, UniquePerson())).Should().BeAssignableTo<OkObjectResult>();
+            (await RentAsync(rentedVehicle, UniqueClientEmail())).Should().BeAssignableTo<OkObjectResult>();
 
             // When
             var actionResult = await SendAsync(new ListVehiclesRequest(false));
@@ -203,9 +203,9 @@ namespace GtMotive.Estimate.Microservice.FunctionalTests.Specs
             return $"TEST-{Guid.NewGuid():N}";
         }
 
-        private static string UniquePerson()
+        private static string UniqueClientEmail()
         {
-            return $"Person {Guid.NewGuid():N}";
+            return $"client-{Guid.NewGuid():N}@example.com";
         }
 
         private async Task<IActionResult> SendAsync<TRequest>(TRequest request)
@@ -231,9 +231,9 @@ namespace GtMotive.Estimate.Microservice.FunctionalTests.Specs
             return result.Value.Should().BeAssignableTo<VehicleViewModel>().Subject;
         }
 
-        private async Task<IActionResult> RentAsync(VehicleViewModel vehicle, string person)
+        private async Task<IActionResult> RentAsync(VehicleViewModel vehicle, string clientEmail)
         {
-            return await SendAsync(new RentVehicleRequest(vehicle.Id, new RentVehicleViewModel { Person = person }));
+            return await SendAsync(new RentVehicleRequest(vehicle.Id, new RentVehicleViewModel { ClientEmail = clientEmail }));
         }
 
         private async Task<IActionResult> ReturnAsync(VehicleViewModel vehicle)

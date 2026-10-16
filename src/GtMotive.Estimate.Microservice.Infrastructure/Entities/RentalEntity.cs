@@ -19,9 +19,9 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.Entities
         /// Initializes a new instance of the <see cref="RentalEntity"/> class.
         /// </summary>
         /// <param name="vehicleId">Vehicle identifier.</param>
-        /// <param name="person">Person that rents the vehicle.</param>
-        public RentalEntity(VehicleId vehicleId, Person person)
-            : base(vehicleId, person)
+        /// <param name="client">Client that rents the vehicle.</param>
+        public RentalEntity(VehicleId vehicleId, Client client)
+            : base(vehicleId, client)
         {
         }
 
@@ -30,11 +30,11 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.Entities
         /// </summary>
         /// <param name="id">Rental identifier.</param>
         /// <param name="vehicleId">Vehicle identifier.</param>
-        /// <param name="person">Person that rents the vehicle.</param>
+        /// <param name="client">Client that rents the vehicle.</param>
         /// <param name="rentDate">Rent date.</param>
         /// <param name="returnDate">Return date.</param>
-        internal RentalEntity(RentalId id, VehicleId vehicleId, Person person, DateTime? rentDate, DateTime? returnDate)
-            : base(vehicleId, person)
+        internal RentalEntity(RentalId id, VehicleId vehicleId, Client client, DateTime? rentDate, DateTime? returnDate)
+            : base(vehicleId, client)
         {
             Id = id;
             RentDate = rentDate;

@@ -56,7 +56,7 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.RentVehicle
                     return;
                 }
 
-                await _vehicleService.Rent(vehicle, new Person(input.Person));
+                await _vehicleService.Rent(vehicle, new Client(input.ClientEmail));
 
                 await _unitOfWork.SaveInTransaction();
 
@@ -66,7 +66,7 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.RentVehicle
             {
                 _outputPort.ConflictHandle(ex.Message);
             }
-            catch (PersonAlreadyHasActiveRentalException ex)
+            catch (ClientAlreadyHasActiveRentalException ex)
             {
                 _outputPort.ConflictHandle(ex.Message);
             }

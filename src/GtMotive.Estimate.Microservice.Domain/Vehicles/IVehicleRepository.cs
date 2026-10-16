@@ -51,11 +51,11 @@ namespace GtMotive.Estimate.Microservice.Domain.Vehicles
         Task UpdateRental(IRental rental);
 
         /// <summary>
-        /// Gets a value indicating whether a person has an active rental in the fleet.
+        /// Gets a value indicating whether a client has an active rental in the fleet.
         /// </summary>
-        /// <param name="person">Person to check.</param>
-        /// <returns>Whether the person has an active rental.</returns>
-        Task<bool> PersonHasActiveRental(Person person);
+        /// <param name="client">Client to check.</param>
+        /// <returns>Whether the client has an active rental.</returns>
+        Task<bool> ClientHasActiveRental(Client client);
 
         /// <summary>
         /// Gets a value indicating whether a vehicle with the plate already exists in the fleet.

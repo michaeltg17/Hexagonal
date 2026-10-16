@@ -19,13 +19,13 @@ namespace GtMotive.Estimate.Microservice.Domain.Vehicles
         /// Initializes a new instance of the <see cref="Rental"/> class.
         /// </summary>
         /// <param name="vehicleId">Vehicle identifier.</param>
-        /// <param name="person">Person that rents the vehicle.</param>
-        protected Rental(VehicleId vehicleId, Person person)
+        /// <param name="client">Client that rents the vehicle.</param>
+        protected Rental(VehicleId vehicleId, Client client)
             : this()
         {
             Id = new RentalId(Guid.NewGuid());
             VehicleId = vehicleId;
-            Person = person;
+            Client = client;
         }
 
         /// <summary>
@@ -39,9 +39,9 @@ namespace GtMotive.Estimate.Microservice.Domain.Vehicles
         public VehicleId VehicleId { get; protected set; }
 
         /// <summary>
-        /// Gets or sets the person that rents the vehicle.
+        /// Gets or sets the client that rents the vehicle.
         /// </summary>
-        public Person Person { get; protected set; }
+        public Client Client { get; protected set; }
 
         /// <summary>
         /// Gets or sets the rent date.

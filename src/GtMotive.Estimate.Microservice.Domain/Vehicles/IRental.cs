@@ -18,9 +18,9 @@ namespace GtMotive.Estimate.Microservice.Domain.Vehicles
         VehicleId VehicleId { get; }
 
         /// <summary>
-        /// Gets the person that rents the vehicle.
+        /// Gets the client that rents the vehicle.
         /// </summary>
-        Person Person { get; }
+        Client Client { get; }
 
         /// <summary>
         /// Gets the rent date.

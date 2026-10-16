@@ -68,17 +68,17 @@ namespace GtMotive.Estimate.Microservice.Domain.Vehicles
         public bool IsAvailable => !Rentals.HasActiveRental();
 
         /// <summary>
-        /// Rents the vehicle to a person.
+        /// Rents the vehicle to a client.
         /// </summary>
         /// <param name="rentalFactory">Rental factory.</param>
-        /// <param name="person">Person that rents the vehicle.</param>
+        /// <param name="client">Client that rents the vehicle.</param>
         /// <param name="rentDate">Rent date.</param>
         /// <returns>The created rental.</returns>
-        public IRental Rent(IRentalFactory rentalFactory, Person person, DateTime rentDate)
+        public IRental Rent(IRentalFactory rentalFactory, Client client, DateTime rentDate)
         {
             ArgumentNullException.ThrowIfNull(rentalFactory);
 
-            var rental = rentalFactory.NewRental(Id, person);
+            var rental = rentalFactory.NewRental(Id, client);
             rental.Rent(rentDate);
             Rentals.Add(rental);
 

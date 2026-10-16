@@ -32,32 +32,43 @@ namespace GtMotive.Estimate.Microservice.FunctionalTests.Specs
         {
             // Given
             var vehicle = await CreateVehicleAsync(UniquePlate());
-            var persons = Enumerable.Range(0, ConcurrentRenters).Select(_ => UniquePerson()).ToList();
+            var clientEmails = Enumerable.Range(0, ConcurrentRenters).Select(_ => UniqueClientEmail()).ToList();
 
             // When
             var results = await Task.WhenAll(
-                persons.Select(person => RentAsync(vehicle, person)));
+                clientEmails.Select(clientEmail => RentAsync(vehicle, clientEmail)));
 
             // Then
             results.Count(result => result is OkObjectResult).Should().Be(1);
             results.Count(result => result is ConflictObjectResult).Should().Be(ConcurrentRenters - 1);
+
+            // Only the winning transaction committed: one active rental, no orphan
+            // rental documents and the vehicle advanced exactly one version.
+            (await Fixture.CountActiveRentalsAsync()).Should().Be(1);
+            (await Fixture.CountRentalsAsync()).Should().Be(1);
+            (await Fixture.GetVehicleVersionAsync(vehicle.Id)).Should().Be(2);
         }
 
         [Fact]
-        public async Task RentVehicle_WhenSamePersonRentsConcurrently_OnlyOneRentSucceeds()
+        public async Task RentVehicle_WhenSameClientRentsConcurrently_OnlyOneRentSucceeds()
         {
             // Given
             var vehicles = await Task.WhenAll(
                 Enumerable.Range(0, 2).Select(_ => CreateVehicleAsync(UniquePlate())));
-            var person = UniquePerson();
+            var clientEmail = UniqueClientEmail();
 
             // When
             var results = await Task.WhenAll(
-                vehicles.Select(vehicle => RentAsync(vehicle, person)));
+                vehicles.Select(vehicle => RentAsync(vehicle, clientEmail)));
 
             // Then
             results.Count(result => result is OkObjectResult).Should().Be(1);
             results.Count(result => result is ConflictObjectResult).Should().Be(1);
+
+            // The client holds exactly one active rental and the losing transaction
+            // left no state behind.
+            (await Fixture.CountActiveRentalsAsync()).Should().Be(1);
+            (await Fixture.CountRentalsAsync()).Should().Be(1);
         }
 
         [Fact]
@@ -66,7 +77,7 @@ namespace GtMotive.Estimate.Microservice.FunctionalTests.Specs
             // Given
             var vehicle = await CreateVehicleAsync(UniquePlate());
 
-            (await RentAsync(vehicle, UniquePerson())).Should().BeAssignableTo<OkObjectResult>();
+            (await RentAsync(vehicle, UniqueClientEmail())).Should().BeAssignableTo<OkObjectResult>();
 
             // When
             var results = await Task.WhenAll(
@@ -75,6 +86,12 @@ namespace GtMotive.Estimate.Microservice.FunctionalTests.Specs
             // Then
             results.Count(result => result is OkObjectResult).Should().Be(1);
             results.Count(result => result is ConflictObjectResult).Should().Be(1);
+
+            // Exactly one return committed: no active rental and the vehicle
+            // advanced from version 2 (rent) to version 3 (return) only.
+            (await Fixture.CountActiveRentalsAsync()).Should().Be(0);
+            (await Fixture.CountRentalsAsync()).Should().Be(1);
+            (await Fixture.GetVehicleVersionAsync(vehicle.Id)).Should().Be(3);
         }
 
         private static CreateVehicleViewModel CreateViewModel(string plate)
@@ -93,9 +110,9 @@ namespace GtMotive.Estimate.Microservice.FunctionalTests.Specs
             return $"TEST-{Guid.NewGuid():N}";
         }
 
-        private static string UniquePerson()
+        private static string UniqueClientEmail()
         {
-            return $"Person {Guid.NewGuid():N}";
+            return $"client-{Guid.NewGuid():N}@example.com";
         }
 
         private async Task<IActionResult> SendAsync<TRequest>(TRequest request)
@@ -121,9 +138,9 @@ namespace GtMotive.Estimate.Microservice.FunctionalTests.Specs
             return result.Value.Should().BeAssignableTo<VehicleViewModel>().Subject;
         }
 
-        private async Task<IActionResult> RentAsync(VehicleViewModel vehicle, string person)
+        private async Task<IActionResult> RentAsync(VehicleViewModel vehicle, string clientEmail)
         {
-            return await SendAsync(new RentVehicleRequest(vehicle.Id, new RentVehicleViewModel { Person = person }));
+            return await SendAsync(new RentVehicleRequest(vehicle.Id, new RentVehicleViewModel { ClientEmail = clientEmail }));
         }
 
         private async Task<IActionResult> ReturnAsync(VehicleViewModel vehicle)

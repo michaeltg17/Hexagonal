@@ -11,11 +11,11 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.RentVehicle
         /// Initializes a new instance of the <see cref="RentVehicleInput"/> class.
         /// </summary>
         /// <param name="vehicleId">Vehicle identifier.</param>
-        /// <param name="person">Person that rents the vehicle.</param>
-        public RentVehicleInput(Guid vehicleId, string person)
+        /// <param name="clientEmail">E-mail that identifies the client that rents the vehicle.</param>
+        public RentVehicleInput(Guid vehicleId, string clientEmail)
         {
             VehicleId = vehicleId;
-            Person = person;
+            ClientEmail = clientEmail;
         }
 
         /// <summary>
@@ -24,8 +24,8 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.RentVehicle
         public Guid VehicleId { get; init; }
 
         /// <summary>
-        /// Gets the person that rents the vehicle.
+        /// Gets the e-mail that identifies the client that rents the vehicle.
         /// </summary>
-        public string Person { get; init; }
+        public string ClientEmail { get; init; }
     }
 }

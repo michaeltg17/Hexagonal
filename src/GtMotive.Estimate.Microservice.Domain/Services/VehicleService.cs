@@ -53,21 +53,21 @@ namespace GtMotive.Estimate.Microservice.Domain.Services
         }
 
         /// <summary>
-        /// Rents a vehicle to a person.
+        /// Rents a vehicle to a client.
         /// </summary>
         /// <param name="vehicle">Vehicle to rent.</param>
-        /// <param name="person">Person that rents the vehicle.</param>
+        /// <param name="client">Client that rents the vehicle.</param>
         /// <returns>The created rental.</returns>
-        public async Task<IRental> Rent(IVehicle vehicle, Person person)
+        public async Task<IRental> Rent(IVehicle vehicle, Client client)
         {
             ArgumentNullException.ThrowIfNull(vehicle);
 
-            if (await _vehicleRepository.PersonHasActiveRental(person))
+            if (await _vehicleRepository.ClientHasActiveRental(client))
             {
-                throw new PersonAlreadyHasActiveRentalException("The person already has an active rental.");
+                throw new ClientAlreadyHasActiveRentalException("The client already has an active rental.");
             }
 
-            var rental = vehicle.Rent(_rentalFactory, person, DateTime.UtcNow);
+            var rental = vehicle.Rent(_rentalFactory, client, DateTime.UtcNow);
             await _vehicleRepository.Update(vehicle);
             await _vehicleRepository.AddRental(rental);
 

@@ -19,9 +19,9 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.MongoDb.Entities
         public Guid VehicleId { get; set; }
 
         /// <summary>
-        /// Gets or sets the person that rents the vehicle.
+        /// Gets or sets the client e-mail that identifies the client that rents the vehicle.
         /// </summary>
-        public string Person { get; set; }
+        public string Client { get; set; }
 
         /// <summary>
         /// Gets or sets the rent date.
