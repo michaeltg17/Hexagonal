@@ -152,8 +152,8 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.Repositories
                 new RentalId(document.Id),
                 new VehicleId(document.VehicleId),
                 new Client(document.Client),
-                document.RentDate,
-                document.ReturnDate);
+                document.StartDate,
+                document.EndDate);
         }
 
         /// <summary>
@@ -192,7 +192,7 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.Repositories
         public async Task<bool> ClientHasActiveRental(Client client)
         {
             var count = await _rentals.CountDocumentsAsync(
-                rental => rental.Client == client.Value && rental.ReturnDate == null);
+                rental => rental.Client == client.Value && rental.EndDate == null);
 
             return count > 0;
         }
@@ -270,7 +270,7 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.Repositories
             foreach (var update in outcome.RentalUpdates)
             {
                 var count = await _rentals.CountDocumentsAsync(
-                    rental => rental.Id == update.Id && rental.ReturnDate == update.ReturnDate);
+                    rental => rental.Id == update.Id && rental.EndDate == update.EndDate);
 
                 if (count == 0)
                 {
@@ -302,8 +302,8 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.Repositories
                 Id = rental.Id.ToGuid(),
                 VehicleId = rental.VehicleId.ToGuid(),
                 Client = rental.Client.Value,
-                RentDate = rental.RentDate,
-                ReturnDate = rental.ReturnDate,
+                StartDate = rental.StartDate,
+                EndDate = rental.EndDate,
             };
         }
 
@@ -385,10 +385,10 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.Repositories
             foreach (var rental in _rentalsToUpdate)
             {
                 var filter = Builders<RentalDocument>.Filter.Eq("Id", rental.Id.ToGuid());
-                var update = Builders<RentalDocument>.Update.Set(document => document.ReturnDate, rental.ReturnDate);
+                var update = Builders<RentalDocument>.Update.Set(document => document.EndDate, rental.EndDate);
                 await UpdateRentalAsync(filter, update);
 
-                outcome.RentalUpdates.Add(new PendingRentalUpdate(rental.Id.ToGuid(), rental.ReturnDate));
+                outcome.RentalUpdates.Add(new PendingRentalUpdate(rental.Id.ToGuid(), rental.EndDate));
                 saved++;
             }
 
@@ -478,7 +478,7 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.Repositories
             public List<Guid> RentalInserts { get; } = [];
 
             /// <summary>
-            /// Gets the rentals updated with a new return date.
+            /// Gets the rentals updated with a new end date.
             /// </summary>
             public List<PendingRentalUpdate> RentalUpdates { get; } = [];
         }
@@ -491,10 +491,10 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.Repositories
         private sealed record PendingVehicleUpdate(Guid Id, long Version);
 
         /// <summary>
-        /// Rental update persisted with the given return date.
+        /// Rental update persisted with the given end date.
         /// </summary>
         /// <param name="Id">Rental identifier.</param>
-        /// <param name="ReturnDate">Return date written by the save.</param>
-        private sealed record PendingRentalUpdate(Guid Id, DateTime? ReturnDate);
+        /// <param name="EndDate">End date written by the save.</param>
+        private sealed record PendingRentalUpdate(Guid Id, DateTime? EndDate);
     }
 }

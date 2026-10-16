@@ -24,14 +24,14 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.MongoDb.Entities
         public string Client { get; set; }
 
         /// <summary>
-        /// Gets or sets the rent date.
+        /// Gets or sets the start date.
         /// </summary>
-        public DateTime? RentDate { get; set; }
+        public DateTime StartDate { get; set; }
 
         /// <summary>
-        /// Gets or sets the return date.
+        /// Gets or sets the end date.
         /// </summary>
         [BsonIgnoreIfNull(false)]
-        public DateTime? ReturnDate { get; set; }
+        public DateTime? EndDate { get; set; }
     }
 }

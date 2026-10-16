@@ -99,7 +99,7 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.MongoDb
         {
             var rentals = _database.GetCollection<RentalDocument>(RentalsCollectionName);
 
-            var activeRentalFilter = new BsonDocument("ReturnDate", BsonNull.Value);
+            var activeRentalFilter = new BsonDocument("EndDate", BsonNull.Value);
             var clientIndex = new CreateIndexModel<RentalDocument>(
                 new BsonDocument("Client", 1),
                 new CreateIndexOptions<RentalDocument>

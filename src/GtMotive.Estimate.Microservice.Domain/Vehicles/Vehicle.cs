@@ -74,9 +74,9 @@ namespace GtMotive.Estimate.Microservice.Domain.Vehicles
         /// </summary>
         /// <param name="rentalFactory">Rental factory.</param>
         /// <param name="client">Client that rents the vehicle.</param>
-        /// <param name="rentDate">Rent date.</param>
+        /// <param name="startDate">Start date.</param>
         /// <returns>The created rental.</returns>
-        public IRental Rent(IRentalFactory rentalFactory, Client client, DateTime rentDate)
+        public IRental Rent(IRentalFactory rentalFactory, Client client, DateTime startDate)
         {
             ArgumentNullException.ThrowIfNull(rentalFactory);
 
@@ -85,8 +85,7 @@ namespace GtMotive.Estimate.Microservice.Domain.Vehicles
                 throw new VehicleAlreadyRentedException("The vehicle is already rented.");
             }
 
-            var rental = rentalFactory.NewRental(Id, client);
-            rental.Rent(rentDate);
+            var rental = rentalFactory.NewRental(Id, client, startDate);
             ActiveRentalId = rental.Id;
 
             return rental;
@@ -96,9 +95,9 @@ namespace GtMotive.Estimate.Microservice.Domain.Vehicles
         /// Returns the vehicle.
         /// </summary>
         /// <param name="activeRental">The active rental of the vehicle.</param>
-        /// <param name="returnDate">Return date.</param>
+        /// <param name="endDate">End date.</param>
         /// <returns>The returned rental.</returns>
-        public IRental Return(IRental activeRental, DateTime returnDate)
+        public IRental Return(IRental activeRental, DateTime endDate)
         {
             ArgumentNullException.ThrowIfNull(activeRental);
 
@@ -107,7 +106,7 @@ namespace GtMotive.Estimate.Microservice.Domain.Vehicles
                 throw new VehicleNotRentedException("The vehicle is not rented.");
             }
 
-            activeRental.Return(returnDate);
+            activeRental.End(endDate);
             ActiveRentalId = null;
 
             return activeRental;

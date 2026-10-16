@@ -11,8 +11,8 @@ namespace GtMotive.Estimate.Microservice.UnitTests.Domain
 {
     public sealed class VehicleTests
     {
-        private static readonly DateTime RentDate = DateTime.UtcNow;
-        private static readonly DateTime ReturnDate = DateTime.UtcNow;
+        private static readonly DateTime StartDate = DateTime.UtcNow;
+        private static readonly DateTime EndDate = DateTime.UtcNow;
 
         [Fact]
         public void Rent_WhenTheVehicleIsAvailable_RentsTheVehicle()
@@ -21,7 +21,7 @@ namespace GtMotive.Estimate.Microservice.UnitTests.Domain
             var vehicle = new TestVehicle();
 
             // When
-            var rental = vehicle.Rent(new StubRentalFactory(), NewClient(), RentDate);
+            var rental = vehicle.Rent(new StubRentalFactory(), NewClient(), StartDate);
 
             // Then
             rental.Should().NotBeNull();
@@ -36,7 +36,7 @@ namespace GtMotive.Estimate.Microservice.UnitTests.Domain
             var (vehicle, _) = RentAVehicle();
 
             // When
-            var act = () => vehicle.Rent(new StubRentalFactory(), NewClient(), RentDate);
+            var act = () => vehicle.Rent(new StubRentalFactory(), NewClient(), StartDate);
 
             // Then
             act.Should().Throw<VehicleAlreadyRentedException>();
@@ -49,10 +49,10 @@ namespace GtMotive.Estimate.Microservice.UnitTests.Domain
             var (vehicle, rental) = RentAVehicle();
 
             // When
-            vehicle.Return(rental.Object, ReturnDate);
+            vehicle.Return(rental.Object, EndDate);
 
             // Then
-            rental.Verify(mock => mock.Return(ReturnDate), Times.Once);
+            rental.Verify(mock => mock.End(EndDate), Times.Once);
             vehicle.IsAvailable.Should().BeTrue();
             vehicle.ActiveRentalId.Should().BeNull();
         }
@@ -65,7 +65,7 @@ namespace GtMotive.Estimate.Microservice.UnitTests.Domain
             var rental = new Mock<IRental>();
 
             // When
-            var act = () => vehicle.Return(rental.Object, ReturnDate);
+            var act = () => vehicle.Return(rental.Object, EndDate);
 
             // Then
             act.Should().Throw<VehicleNotRentedException>();
@@ -79,11 +79,11 @@ namespace GtMotive.Estimate.Microservice.UnitTests.Domain
             var otherRental = new Mock<IRental>();
 
             // When
-            var act = () => vehicle.Return(otherRental.Object, ReturnDate);
+            var act = () => vehicle.Return(otherRental.Object, EndDate);
 
             // Then
             act.Should().Throw<VehicleNotRentedException>();
-            activeRental.Verify(mock => mock.Return(It.IsAny<DateTime>()), Times.Never);
+            activeRental.Verify(mock => mock.End(It.IsAny<DateTime>()), Times.Never);
         }
 
         private static (TestVehicle Vehicle, Mock<IRental> Rental) RentAVehicle()
@@ -91,7 +91,7 @@ namespace GtMotive.Estimate.Microservice.UnitTests.Domain
             var vehicle = new TestVehicle();
             var factory = new StubRentalFactory();
 
-            vehicle.Rent(factory, NewClient(), RentDate);
+            vehicle.Rent(factory, NewClient(), StartDate);
 
             return (vehicle, factory.Created);
         }
@@ -109,7 +109,7 @@ namespace GtMotive.Estimate.Microservice.UnitTests.Domain
         {
             public Mock<IRental> Created { get; private set; }
 
-            public IRental NewRental(VehicleId vehicleId, Client client)
+            public IRental NewRental(VehicleId vehicleId, Client client, DateTime startDate)
             {
                 Created = new Mock<IRental>();
                 Created

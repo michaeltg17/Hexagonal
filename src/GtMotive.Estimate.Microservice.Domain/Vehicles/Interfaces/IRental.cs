@@ -24,14 +24,14 @@ namespace GtMotive.Estimate.Microservice.Domain.Vehicles.Interfaces
         Client Client { get; }
 
         /// <summary>
-        /// Gets the rent date.
+        /// Gets the start date.
         /// </summary>
-        DateTime? RentDate { get; }
+        DateTime StartDate { get; }
 
         /// <summary>
-        /// Gets the return date.
+        /// Gets the end date.
         /// </summary>
-        DateTime? ReturnDate { get; }
+        DateTime? EndDate { get; }
 
         /// <summary>
         /// Gets a value indicating whether the rental is active.
@@ -39,15 +39,9 @@ namespace GtMotive.Estimate.Microservice.Domain.Vehicles.Interfaces
         bool IsActive { get; }
 
         /// <summary>
-        /// Marks the rental as rented.
+        /// Marks the rental as ended.
         /// </summary>
-        /// <param name="rentDate">Rent date.</param>
-        void Rent(DateTime rentDate);
-
-        /// <summary>
-        /// Marks the rental as returned.
-        /// </summary>
-        /// <param name="returnDate">Return date.</param>
-        void Return(DateTime returnDate);
+        /// <param name="endDate">End date.</param>
+        void End(DateTime endDate);
     }
 }
