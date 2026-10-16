@@ -47,24 +47,7 @@ namespace GtMotive.Estimate.Microservice.Infrastructure
         }
 
         /// <summary>
-        /// Applies all database changes.
-        /// </summary>
-        /// <returns>Number of affected rows.</returns>
-        public async Task<int> Save()
-        {
-            try
-            {
-                return await _vehicleRepository.SaveChanges();
-            }
-            catch (MongoCommandException ex) when (IsTransientTransactionError(ex))
-            {
-                throw new VehicleConcurrencyException(
-                    "The vehicle was modified by another operation. Please try again.");
-            }
-        }
-
-        /// <summary>
-        /// Applies all database changes in a single transaction.
+        /// Applies all database changes atomically in a single transaction.
         /// </summary>
         /// <remarks>
         /// Transient transaction failures abort the attempt and replay the same buffered changes
@@ -74,7 +57,7 @@ namespace GtMotive.Estimate.Microservice.Infrastructure
         /// success or a conflict.
         /// </remarks>
         /// <returns>Number of affected rows.</returns>
-        public async Task<int> SaveInTransaction()
+        public async Task<int> Save()
         {
             using var session = await _client.StartSessionAsync();
 

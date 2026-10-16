@@ -58,7 +58,7 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.RentVehicle
 
                 await _vehicleService.Rent(vehicle, new Client(input.ClientEmail));
 
-                await _unitOfWork.SaveInTransaction();
+                await _unitOfWork.Save();
 
                 _outputPort.StandardHandle(new RentVehicleOutput(VehicleDtoMapper.Map(vehicle)));
             }
