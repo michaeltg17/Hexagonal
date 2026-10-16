@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GtMotive.Estimate.Microservice.Domain.Vehicles
+namespace GtMotive.Estimate.Microservice.Domain.Vehicles.ValueObjects
 {
     /// <summary>
     /// Value object that represents the identifier of a rental.

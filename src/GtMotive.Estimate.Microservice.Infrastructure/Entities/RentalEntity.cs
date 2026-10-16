@@ -1,5 +1,6 @@
 ﻿using System;
 using GtMotive.Estimate.Microservice.Domain.Vehicles;
+using GtMotive.Estimate.Microservice.Domain.Vehicles.ValueObjects;
 
 namespace GtMotive.Estimate.Microservice.Infrastructure.Entities
 {

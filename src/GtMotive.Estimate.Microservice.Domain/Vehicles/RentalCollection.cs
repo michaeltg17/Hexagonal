@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using GtMotive.Estimate.Microservice.Domain.Exceptions;
+using GtMotive.Estimate.Microservice.Domain.Vehicles.Interfaces;
 
 namespace GtMotive.Estimate.Microservice.Domain.Vehicles
 {

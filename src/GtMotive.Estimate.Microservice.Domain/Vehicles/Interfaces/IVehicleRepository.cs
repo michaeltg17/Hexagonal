@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using GtMotive.Estimate.Microservice.Domain.Vehicles.ValueObjects;
 
-namespace GtMotive.Estimate.Microservice.Domain.Vehicles
+namespace GtMotive.Estimate.Microservice.Domain.Vehicles.Interfaces
 {
     /// <summary>
     /// Repository contract for the vehicle aggregate.

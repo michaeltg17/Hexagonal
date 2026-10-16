@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GtMotive.Estimate.Microservice.Domain.Exceptions
+namespace GtMotive.Estimate.Microservice.Domain.Vehicles.Exceptions
 {
     /// <summary>
     /// Exception thrown when a rental has already been returned.

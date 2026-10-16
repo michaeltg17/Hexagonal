@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
 using GtMotive.Estimate.Microservice.Domain.Exceptions;
-using GtMotive.Estimate.Microservice.Domain.Vehicles;
+using GtMotive.Estimate.Microservice.Domain.Vehicles.Interfaces;
+using GtMotive.Estimate.Microservice.Domain.Vehicles.ValueObjects;
 
-namespace GtMotive.Estimate.Microservice.Domain.Services
+namespace GtMotive.Estimate.Microservice.Domain.Vehicles
 {
     /// <summary>
     /// Domain service that orchestrates the vehicle aggregate behavior.

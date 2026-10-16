@@ -1,20 +1,33 @@
-﻿using GtMotive.Estimate.Microservice.Domain.ValueObjects;
+﻿using System;
+using GtMotive.Estimate.Microservice.Domain.Exceptions;
 
-namespace GtMotive.Estimate.Microservice.Domain.Vehicles
+namespace GtMotive.Estimate.Microservice.Domain.Vehicles.ValueObjects
 {
     /// <summary>
     /// Value object that represents the model of a vehicle.
     /// </summary>
-    public sealed record Model : StringValueObject
+    public sealed record Model
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Model"/> class.
         /// </summary>
         /// <param name="value">Model value.</param>
         public Model(string value)
-            : base(value)
         {
+            ArgumentNullException.ThrowIfNull(value);
+
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                throw new ValueShouldNotBeEmptyException("The vehicle model can not be empty.");
+            }
+
+            Value = value.Trim();
         }
+
+        /// <summary>
+        /// Gets the model value.
+        /// </summary>
+        public string Value { get; }
 
         /// <summary>
         /// Returns the model value as a string.
