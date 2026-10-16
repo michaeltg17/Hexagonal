@@ -58,11 +58,15 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.ReturnVehicle
 
                 await _vehicleService.Return(vehicle);
 
-                await _unitOfWork.Save();
+                await _unitOfWork.SaveInTransaction();
 
                 _outputPort.StandardHandle(new ReturnVehicleOutput(VehicleDtoMapper.Map(vehicle)));
             }
             catch (VehicleNotRentedException ex)
+            {
+                _outputPort.ConflictHandle(ex.Message);
+            }
+            catch (VehicleConcurrencyException ex)
             {
                 _outputPort.ConflictHandle(ex.Message);
             }

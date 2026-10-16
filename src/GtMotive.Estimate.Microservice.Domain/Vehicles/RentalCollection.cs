@@ -51,12 +51,15 @@ namespace GtMotive.Estimate.Microservice.Domain.Vehicles
         /// Returns the active rental of the collection.
         /// </summary>
         /// <param name="returnDate">Return date.</param>
-        public void ReturnActive(DateTime returnDate)
+        /// <returns>The returned rental.</returns>
+        public IRental ReturnActive(DateTime returnDate)
         {
             var active = GetActive()
                 ?? throw new VehicleNotRentedException("The vehicle is not rented.");
 
             active.Return(returnDate);
+
+            return active;
         }
 
         /// <summary>

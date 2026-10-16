@@ -1,4 +1,5 @@
 ﻿using System;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace GtMotive.Estimate.Microservice.Infrastructure.MongoDb.Entities
 {
@@ -30,6 +31,7 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.MongoDb.Entities
         /// <summary>
         /// Gets or sets the return date.
         /// </summary>
+        [BsonIgnoreIfNull(false)]
         public DateTime? ReturnDate { get; set; }
     }
 }

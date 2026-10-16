@@ -89,9 +89,10 @@ namespace GtMotive.Estimate.Microservice.Domain.Vehicles
         /// Returns the vehicle.
         /// </summary>
         /// <param name="returnDate">Return date.</param>
-        public void Return(DateTime returnDate)
+        /// <returns>The returned rental.</returns>
+        public IRental Return(DateTime returnDate)
         {
-            Rentals.ReturnActive(returnDate);
+            return Rentals.ReturnActive(returnDate);
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using DotNet.Testcontainers.Builders;
 using GtMotive.Estimate.Microservice.Api;
 using GtMotive.Estimate.Microservice.Infrastructure;
+using GtMotive.Estimate.Microservice.Infrastructure.MongoDb;
 using GtMotive.Estimate.Microservice.Infrastructure.MongoDb.Settings;
 using MediatR;
 using Microsoft.Extensions.Configuration;
@@ -20,7 +21,9 @@ namespace GtMotive.Estimate.Microservice.FunctionalTests.Infrastructure
     {
         private const string MongoImage = "mongo:8";
         private const int MongoPort = 27017;
+        private const string ReplicaSetName = "rs0";
         private const string VehiclesCollectionName = "vehicles";
+        private const string RentalsCollectionName = "rentals";
         private static readonly TimeSpan WaitStrategyTimeout = TimeSpan.FromMinutes(2);
 
         private readonly MongoDbContainer _container;
@@ -30,6 +33,7 @@ namespace GtMotive.Estimate.Microservice.FunctionalTests.Infrastructure
         {
             _container = new MongoDbBuilder(MongoImage)
                 .WithExposedPort(MongoPort)
+                .WithReplicaSet(ReplicaSetName)
                 .WithWaitStrategy(
                     Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(
                         MongoPort,
@@ -111,8 +115,11 @@ namespace GtMotive.Estimate.Microservice.FunctionalTests.Infrastructure
         {
             using var scope = _serviceProvider.CreateScope();
             var database = scope.ServiceProvider.GetRequiredService<IMongoDatabase>();
+            var initializer = scope.ServiceProvider.GetRequiredService<MongoDbInitializer>();
 
             await database.DropCollectionAsync(VehiclesCollectionName);
+            await database.DropCollectionAsync(RentalsCollectionName);
+            await initializer.InitializeAsync();
         }
 
         private static void ConfigureServices(IServiceCollection services, string mongoConnectionString)

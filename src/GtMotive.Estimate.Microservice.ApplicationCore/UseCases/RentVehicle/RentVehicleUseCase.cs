@@ -58,7 +58,7 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.RentVehicle
 
                 await _vehicleService.Rent(vehicle, new Person(input.Person));
 
-                await _unitOfWork.Save();
+                await _unitOfWork.SaveInTransaction();
 
                 _outputPort.StandardHandle(new RentVehicleOutput(VehicleDtoMapper.Map(vehicle)));
             }
@@ -67,6 +67,10 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.RentVehicle
                 _outputPort.ConflictHandle(ex.Message);
             }
             catch (PersonAlreadyHasActiveRentalException ex)
+            {
+                _outputPort.ConflictHandle(ex.Message);
+            }
+            catch (VehicleConcurrencyException ex)
             {
                 _outputPort.ConflictHandle(ex.Message);
             }
