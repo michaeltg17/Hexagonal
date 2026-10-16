@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GtMotive.Estimate.Microservice.Domain.Exceptions;
 using GtMotive.Estimate.Microservice.Domain.Interfaces;
+using GtMotive.Estimate.Microservice.Domain.Vehicles.Exceptions;
 using GtMotive.Estimate.Microservice.Infrastructure.Repositories;
 using MongoDB.Driver;
 

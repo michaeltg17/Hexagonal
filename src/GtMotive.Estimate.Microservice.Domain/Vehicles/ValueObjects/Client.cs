@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Text.RegularExpressions;
-using GtMotive.Estimate.Microservice.Domain.Exceptions;
+using GtMotive.Estimate.Microservice.Domain.Vehicles.Exceptions;
 
 namespace GtMotive.Estimate.Microservice.Domain.Vehicles.ValueObjects
 {
@@ -30,7 +30,7 @@ namespace GtMotive.Estimate.Microservice.Domain.Vehicles.ValueObjects
             if (!EmailPattern().IsMatch(email))
             {
                 throw new ClientEmailShouldBeValidException(
-                    $"The client e-mail '{email}' is not valid.");
+                    $"The client e-mail '{value}' is not valid.");
             }
 
             Value = email;
