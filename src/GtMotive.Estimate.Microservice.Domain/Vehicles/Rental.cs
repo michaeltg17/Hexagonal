@@ -22,12 +22,14 @@ namespace GtMotive.Estimate.Microservice.Domain.Vehicles
         /// </summary>
         /// <param name="vehicleId">Vehicle identifier.</param>
         /// <param name="client">Client that rents the vehicle.</param>
-        protected Rental(VehicleId vehicleId, Client client)
+        /// <param name="startDate">Start date.</param>
+        protected Rental(VehicleId vehicleId, Client client, DateTime startDate)
             : this()
         {
             Id = new RentalId(Guid.NewGuid());
             VehicleId = vehicleId;
             Client = client;
+            StartDate = startDate;
         }
 
         /// <summary>
@@ -46,41 +48,32 @@ namespace GtMotive.Estimate.Microservice.Domain.Vehicles
         public Client Client { get; protected set; }
 
         /// <summary>
-        /// Gets or sets the rent date.
+        /// Gets or sets the start date.
         /// </summary>
-        public DateTime? RentDate { get; protected set; }
+        public DateTime StartDate { get; protected set; }
 
         /// <summary>
-        /// Gets or sets the return date.
+        /// Gets or sets the end date.
         /// </summary>
-        public DateTime? ReturnDate { get; protected set; }
+        public DateTime? EndDate { get; protected set; }
 
         /// <summary>
         /// Gets a value indicating whether the rental is active.
         /// </summary>
-        public bool IsActive => ReturnDate is null;
+        public bool IsActive => EndDate is null;
 
         /// <summary>
-        /// Marks the rental as rented.
+        /// Marks the rental as ended.
         /// </summary>
-        /// <param name="rentDate">Rent date.</param>
-        public void Rent(DateTime rentDate)
+        /// <param name="endDate">End date.</param>
+        public void End(DateTime endDate)
         {
-            RentDate = rentDate;
-        }
-
-        /// <summary>
-        /// Marks the rental as returned.
-        /// </summary>
-        /// <param name="returnDate">Return date.</param>
-        public void Return(DateTime returnDate)
-        {
-            if (ReturnDate is not null)
+            if (EndDate is not null)
             {
-                throw new RentalAlreadyReturnedException("The rental has already been returned.");
+                throw new RentalAlreadyReturnedException("The rental has already been ended.");
             }
 
-            ReturnDate = returnDate;
+            EndDate = endDate;
         }
     }
 }

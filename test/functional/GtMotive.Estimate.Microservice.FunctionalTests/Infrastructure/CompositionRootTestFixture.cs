@@ -163,7 +163,7 @@ namespace GtMotive.Estimate.Microservice.FunctionalTests.Infrastructure
 
             return (int)await database
                 .GetCollection<RentalDocument>(RentalsCollectionName)
-                .CountDocumentsAsync(rental => rental.ReturnDate == null);
+                .CountDocumentsAsync(rental => rental.EndDate == null);
         }
 
         /// <summary>

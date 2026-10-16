@@ -48,16 +48,16 @@ namespace GtMotive.Estimate.Microservice.Domain.Vehicles.Interfaces
         /// </summary>
         /// <param name="rentalFactory">Rental factory.</param>
         /// <param name="client">Client that rents the vehicle.</param>
-        /// <param name="rentDate">Rent date.</param>
+        /// <param name="startDate">Start date.</param>
         /// <returns>The created rental.</returns>
-        IRental Rent(IRentalFactory rentalFactory, Client client, DateTime rentDate);
+        IRental Rent(IRentalFactory rentalFactory, Client client, DateTime startDate);
 
         /// <summary>
         /// Returns the active rental of the vehicle.
         /// </summary>
         /// <param name="activeRental">The active rental of the vehicle.</param>
-        /// <param name="returnDate">Return date.</param>
+        /// <param name="endDate">End date.</param>
         /// <returns>The returned rental.</returns>
-        IRental Return(IRental activeRental, DateTime returnDate);
+        IRental Return(IRental activeRental, DateTime endDate);
     }
 }

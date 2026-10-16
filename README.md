@@ -354,7 +354,7 @@ In Factory pattern, we create object without exposing the creation logic to the 
 ```
     public interface IRentalFactory
     {
-        IRental NewRental(VehicleId vehicleId, Person person);
+        IRental NewRental(VehicleId vehicleId, Person person, DateTime startDate);
     }
 ```    
 ```
@@ -368,7 +368,8 @@ In Factory pattern, we create object without exposing the creation logic to the 
 
         public IRental NewRental(
             VehicleId vehicleId,
-            Person person) => new RentalEntity(vehicleId, person);
+            Person person,
+            DateTime startDate) => new RentalEntity(vehicleId, person, startDate);
     }
 ```
 
@@ -420,31 +421,34 @@ Highly abstract and mutable objects unique identified by its IDs
 ```
     public abstract class Rental : IRental
     {
+        protected Rental(VehicleId vehicleId, Person person, DateTime startDate)
+        {
+            this.Id = new RentalId(Guid.NewGuid());
+            this.VehicleId = vehicleId;
+            this.Person = person;
+            this.StartDate = startDate;
+        }
+
         public RentalId Id { get; protected set; }
 
         public VehicleId VehicleId { get; protected set; }
 
         public Person Person { get; protected set; }
 
-        public DateTime? RentDate { get; protected set; }
+        public DateTime StartDate { get; protected set; }
 
-        public DateTime? ReturnDate { get; protected set; }
+        public DateTime? EndDate { get; protected set; }
 
-        public bool IsActive => this.ReturnDate is null;
+        public bool IsActive => this.EndDate is null;
 
-        public void Rent(DateTime rentDate)
+        public void End(DateTime endDate)
         {
-            this.RentDate = rentDate;
-        }
-
-        public void Return(DateTime returnDate)
-        {
-            if (this.ReturnDate is not null)
+            if (this.EndDate is not null)
             {
-                throw new RentalAlreadyReturnedException("The rental has already been returned.");
+                throw new RentalAlreadyReturnedException("The rental has already been ended.");
             }
 
-            this.ReturnDate = returnDate;
+            this.EndDate = endDate;
         }
     }
 ```
@@ -485,26 +489,25 @@ Similar to Entities with the addition that Aggregate Root are responsible to kee
 
         public bool IsAvailable => this.Rentals.GetActive() is null;
 
-        public IRental Rent(IRentalFactory rentalFactory, Person person, DateTime rentDate)
+        public IRental Rent(IRentalFactory rentalFactory, Person person, DateTime startDate)
         {
             if (!this.IsAvailable)
             {
                 throw new VehicleAlreadyRentedException("The vehicle is already rented.");
             }
 
-            var rental = rentalFactory.NewRental(this.Id, person);
-            rental.Rent(rentDate);
+            var rental = rentalFactory.NewRental(this.Id, person, startDate);
             this.Rentals.Add(rental);
 
             return rental;
         }
 
-        public void Return(DateTime returnDate)
+        public void Return(DateTime endDate)
         {
             var active = this.Rentals.GetActive()
                 ?? throw new VehicleNotRentedException("The vehicle is not rented.");
 
-            active.Return(returnDate);
+            active.End(endDate);
         }
     }
 ```

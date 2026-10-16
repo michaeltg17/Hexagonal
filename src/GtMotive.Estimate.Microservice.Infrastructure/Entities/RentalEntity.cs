@@ -21,8 +21,9 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.Entities
         /// </summary>
         /// <param name="vehicleId">Vehicle identifier.</param>
         /// <param name="client">Client that rents the vehicle.</param>
-        public RentalEntity(VehicleId vehicleId, Client client)
-            : base(vehicleId, client)
+        /// <param name="startDate">Start date.</param>
+        public RentalEntity(VehicleId vehicleId, Client client, DateTime startDate)
+            : base(vehicleId, client, startDate)
         {
         }
 
@@ -32,14 +33,13 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.Entities
         /// <param name="id">Rental identifier.</param>
         /// <param name="vehicleId">Vehicle identifier.</param>
         /// <param name="client">Client that rents the vehicle.</param>
-        /// <param name="rentDate">Rent date.</param>
-        /// <param name="returnDate">Return date.</param>
-        internal RentalEntity(RentalId id, VehicleId vehicleId, Client client, DateTime? rentDate, DateTime? returnDate)
-            : base(vehicleId, client)
+        /// <param name="startDate">Start date.</param>
+        /// <param name="endDate">End date.</param>
+        internal RentalEntity(RentalId id, VehicleId vehicleId, Client client, DateTime startDate, DateTime? endDate)
+            : base(vehicleId, client, startDate)
         {
             Id = id;
-            RentDate = rentDate;
-            ReturnDate = returnDate;
+            EndDate = endDate;
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using GtMotive.Estimate.Microservice.Domain.Vehicles.ValueObjects;
+﻿using System;
+using GtMotive.Estimate.Microservice.Domain.Vehicles.ValueObjects;
 
 namespace GtMotive.Estimate.Microservice.Domain.Vehicles.Interfaces
 {
@@ -12,7 +13,8 @@ namespace GtMotive.Estimate.Microservice.Domain.Vehicles.Interfaces
         /// </summary>
         /// <param name="vehicleId">Vehicle identifier.</param>
         /// <param name="client">Client that rents the vehicle.</param>
+        /// <param name="startDate">Start date.</param>
         /// <returns>The new rental.</returns>
-        IRental NewRental(VehicleId vehicleId, Client client);
+        IRental NewRental(VehicleId vehicleId, Client client, DateTime startDate);
     }
 }
