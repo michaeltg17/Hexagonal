@@ -8,15 +8,9 @@ namespace GtMotive.Estimate.Microservice.Domain.Interfaces
     public interface IUnitOfWork
     {
         /// <summary>
-        /// Applies all database changes.
+        /// Applies all database changes atomically in a single transaction.
         /// </summary>
         /// <returns>Number of affected rows.</returns>
         Task<int> Save();
-
-        /// <summary>
-        /// Applies all database changes in a single transaction.
-        /// </summary>
-        /// <returns>Number of affected rows.</returns>
-        Task<int> SaveInTransaction();
     }
 }

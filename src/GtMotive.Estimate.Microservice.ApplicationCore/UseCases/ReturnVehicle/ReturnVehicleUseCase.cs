@@ -58,7 +58,7 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.ReturnVehicle
 
                 await _vehicleService.Return(vehicle);
 
-                await _unitOfWork.SaveInTransaction();
+                await _unitOfWork.Save();
 
                 _outputPort.StandardHandle(new ReturnVehicleOutput(VehicleDtoMapper.Map(vehicle)));
             }
