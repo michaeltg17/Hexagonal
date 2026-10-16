@@ -1,5 +1,4 @@
 ﻿using System;
-using GtMotive.Estimate.Microservice.Domain.Exceptions;
 
 namespace GtMotive.Estimate.Microservice.Domain.Vehicles
 {
@@ -79,11 +78,6 @@ namespace GtMotive.Estimate.Microservice.Domain.Vehicles
         {
             ArgumentNullException.ThrowIfNull(rentalFactory);
 
-            if (!IsAvailable)
-            {
-                throw new VehicleAlreadyRentedException("The vehicle is already rented.");
-            }
-
             var rental = rentalFactory.NewRental(Id, person);
             rental.Rent(rentDate);
             Rentals.Add(rental);
@@ -97,10 +91,7 @@ namespace GtMotive.Estimate.Microservice.Domain.Vehicles
         /// <param name="returnDate">Return date.</param>
         public void Return(DateTime returnDate)
         {
-            var activeRental = Rentals.GetActive()
-                ?? throw new VehicleNotRentedException("The vehicle is not rented.");
-
-            activeRental.Return(returnDate);
+            Rentals.ReturnActive(returnDate);
         }
     }
 }

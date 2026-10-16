@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using GtMotive.Estimate.Microservice.Domain.Exceptions;
 
 namespace GtMotive.Estimate.Microservice.Domain.Vehicles
 {
@@ -19,6 +20,11 @@ namespace GtMotive.Estimate.Microservice.Domain.Vehicles
         public void Add(IRental rental)
         {
             ArgumentNullException.ThrowIfNull(rental);
+
+            if (rental.IsActive && this.HasActiveRental())
+            {
+                throw new VehicleAlreadyRentedException("The vehicle is already rented.");
+            }
 
             _rentals.Add(rental);
         }
@@ -39,6 +45,18 @@ namespace GtMotive.Estimate.Microservice.Domain.Vehicles
         public IRental GetActive()
         {
             return _rentals.FirstOrDefault(rental => rental.IsActive);
+        }
+
+        /// <summary>
+        /// Returns the active rental of the collection.
+        /// </summary>
+        /// <param name="returnDate">Return date.</param>
+        public void ReturnActive(DateTime returnDate)
+        {
+            var active = GetActive()
+                ?? throw new VehicleNotRentedException("The vehicle is not rented.");
+
+            active.Return(returnDate);
         }
 
         /// <summary>
