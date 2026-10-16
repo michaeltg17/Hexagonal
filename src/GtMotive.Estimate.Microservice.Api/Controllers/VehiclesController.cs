@@ -16,20 +16,15 @@ namespace GtMotive.Estimate.Microservice.Api.Controllers
     /// <summary>
     /// Vehicles controller.
     /// </summary>
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="VehiclesController"/> class.
+    /// </remarks>
+    /// <param name="requestSender">Request sender.</param>
     [ApiController]
     [Route("api/[controller]")]
-    public class VehiclesController : ControllerBase
+    public class VehiclesController(ISender requestSender) : ControllerBase
     {
-        private readonly ISender _requestSender;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="VehiclesController"/> class.
-        /// </summary>
-        /// <param name="requestSender">Request sender.</param>
-        public VehiclesController(ISender requestSender)
-        {
-            _requestSender = requestSender ?? throw new ArgumentNullException(nameof(requestSender));
-        }
+        private readonly ISender _requestSender = requestSender ?? throw new ArgumentNullException(nameof(requestSender));
 
         /// <summary>
         /// Creates a new vehicle in the fleet.

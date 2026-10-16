@@ -11,24 +11,17 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.CreateVehicle
     /// <summary>
     /// Use case that creates a new vehicle in the fleet.
     /// </summary>
-    public sealed class CreateVehicleUseCase : IUseCase<CreateVehicleInput>
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="CreateVehicleUseCase"/> class.
+    /// </remarks>
+    /// <param name="vehicleService">Vehicle domain service.</param>
+    /// <param name="unitOfWork">Unit of work.</param>
+    /// <param name="outputPort">Output port.</param>
+    public sealed class CreateVehicleUseCase(VehicleService vehicleService, IUnitOfWork unitOfWork, ICreateVehicleOutputPort outputPort) : IUseCase<CreateVehicleInput>
     {
-        private readonly VehicleService _vehicleService;
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly ICreateVehicleOutputPort _outputPort;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CreateVehicleUseCase"/> class.
-        /// </summary>
-        /// <param name="vehicleService">Vehicle domain service.</param>
-        /// <param name="unitOfWork">Unit of work.</param>
-        /// <param name="outputPort">Output port.</param>
-        public CreateVehicleUseCase(VehicleService vehicleService, IUnitOfWork unitOfWork, ICreateVehicleOutputPort outputPort)
-        {
-            _vehicleService = vehicleService ?? throw new ArgumentNullException(nameof(vehicleService));
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-            _outputPort = outputPort ?? throw new ArgumentNullException(nameof(outputPort));
-        }
+        private readonly VehicleService _vehicleService = vehicleService ?? throw new ArgumentNullException(nameof(vehicleService));
+        private readonly IUnitOfWork _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        private readonly ICreateVehicleOutputPort _outputPort = outputPort ?? throw new ArgumentNullException(nameof(outputPort));
 
         /// <summary>
         /// Executes the use case.

@@ -11,7 +11,12 @@ namespace GtMotive.Estimate.Microservice.Infrastructure
     /// <summary>
     /// Unit of work that persists the changes buffered by the repositories.
     /// </summary>
-    public sealed class UnitOfWork : IUnitOfWork
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="UnitOfWork"/> class.
+    /// </remarks>
+    /// <param name="client">Mongo client.</param>
+    /// <param name="vehicleRepository">Vehicle repository.</param>
+    public sealed class UnitOfWork(IMongoClient client, VehicleRepository vehicleRepository) : IUnitOfWork
     {
         private const int MaxTransactionAttempts = 3;
         private const int UnknownTransactionCommitResultErrorCode = 69770;
@@ -32,19 +37,8 @@ namespace GtMotive.Estimate.Microservice.Infrastructure
             43494, // StaleDbVersion.
         ];
 
-        private readonly IMongoClient _client;
-        private readonly VehicleRepository _vehicleRepository;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UnitOfWork"/> class.
-        /// </summary>
-        /// <param name="client">Mongo client.</param>
-        /// <param name="vehicleRepository">Vehicle repository.</param>
-        public UnitOfWork(IMongoClient client, VehicleRepository vehicleRepository)
-        {
-            _client = client ?? throw new ArgumentNullException(nameof(client));
-            _vehicleRepository = vehicleRepository ?? throw new ArgumentNullException(nameof(vehicleRepository));
-        }
+        private readonly IMongoClient _client = client ?? throw new ArgumentNullException(nameof(client));
+        private readonly VehicleRepository _vehicleRepository = vehicleRepository ?? throw new ArgumentNullException(nameof(vehicleRepository));
 
         /// <summary>
         /// Applies all database changes atomically in a single transaction.
@@ -89,13 +83,10 @@ namespace GtMotive.Estimate.Microservice.Infrastructure
                         var applied = await _vehicleRepository.VerifyLastSaveOutcomeAsync();
                         await TryAbortTransactionAsync(session);
 
-                        if (!applied)
-                        {
-                            throw new VehicleConcurrencyException(
-                                "The vehicle was modified by another operation. Please try again.");
-                        }
-
-                        return saved;
+                        return !applied
+                            ? throw new VehicleConcurrencyException(
+                                "The vehicle was modified by another operation. Please try again.")
+                            : saved;
                     }
                     catch (MongoCommandException ex) when (IsTransientTransactionError(ex))
                     {

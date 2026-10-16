@@ -9,27 +9,20 @@ namespace GtMotive.Estimate.Microservice.Domain.Vehicles
     /// <summary>
     /// Domain service that orchestrates the vehicle aggregate behavior.
     /// </summary>
-    public class VehicleService
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="VehicleService"/> class.
+    /// </remarks>
+    /// <param name="vehicleFactory">Vehicle factory.</param>
+    /// <param name="rentalFactory">Rental factory.</param>
+    /// <param name="vehicleRepository">Vehicle repository.</param>
+    public class VehicleService(
+        IVehicleFactory vehicleFactory,
+        IRentalFactory rentalFactory,
+        IVehicleRepository vehicleRepository)
     {
-        private readonly IVehicleFactory _vehicleFactory;
-        private readonly IRentalFactory _rentalFactory;
-        private readonly IVehicleRepository _vehicleRepository;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="VehicleService"/> class.
-        /// </summary>
-        /// <param name="vehicleFactory">Vehicle factory.</param>
-        /// <param name="rentalFactory">Rental factory.</param>
-        /// <param name="vehicleRepository">Vehicle repository.</param>
-        public VehicleService(
-            IVehicleFactory vehicleFactory,
-            IRentalFactory rentalFactory,
-            IVehicleRepository vehicleRepository)
-        {
-            _vehicleFactory = vehicleFactory ?? throw new ArgumentNullException(nameof(vehicleFactory));
-            _rentalFactory = rentalFactory ?? throw new ArgumentNullException(nameof(rentalFactory));
-            _vehicleRepository = vehicleRepository ?? throw new ArgumentNullException(nameof(vehicleRepository));
-        }
+        private readonly IVehicleFactory _vehicleFactory = vehicleFactory ?? throw new ArgumentNullException(nameof(vehicleFactory));
+        private readonly IRentalFactory _rentalFactory = rentalFactory ?? throw new ArgumentNullException(nameof(rentalFactory));
+        private readonly IVehicleRepository _vehicleRepository = vehicleRepository ?? throw new ArgumentNullException(nameof(vehicleRepository));
 
         /// <summary>
         /// Creates a new vehicle in the fleet.

@@ -10,21 +10,15 @@ namespace GtMotive.Estimate.Microservice.Api.UseCases.GetVehicle
     /// <summary>
     /// MediatR handler of the get vehicle use case.
     /// </summary>
-    public sealed class GetVehicleHandler : IRequestHandler<GetVehicleRequest, IWebApiPresenter>
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="GetVehicleHandler"/> class.
+    /// </remarks>
+    /// <param name="getVehicleUseCase">Get vehicle use case.</param>
+    /// <param name="presenter">Web API presenter.</param>
+    public sealed class GetVehicleHandler(IUseCase<GetVehicleInput> getVehicleUseCase, GetVehiclePresenter presenter) : IRequestHandler<GetVehicleRequest, IWebApiPresenter>
     {
-        private readonly IUseCase<GetVehicleInput> _getVehicleUseCase;
-        private readonly GetVehiclePresenter _presenter;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="GetVehicleHandler"/> class.
-        /// </summary>
-        /// <param name="getVehicleUseCase">Get vehicle use case.</param>
-        /// <param name="presenter">Web API presenter.</param>
-        public GetVehicleHandler(IUseCase<GetVehicleInput> getVehicleUseCase, GetVehiclePresenter presenter)
-        {
-            _getVehicleUseCase = getVehicleUseCase ?? throw new ArgumentNullException(nameof(getVehicleUseCase));
-            _presenter = presenter ?? throw new ArgumentNullException(nameof(presenter));
-        }
+        private readonly IUseCase<GetVehicleInput> _getVehicleUseCase = getVehicleUseCase ?? throw new ArgumentNullException(nameof(getVehicleUseCase));
+        private readonly GetVehiclePresenter _presenter = presenter ?? throw new ArgumentNullException(nameof(presenter));
 
         /// <summary>
         /// Handles the request.
