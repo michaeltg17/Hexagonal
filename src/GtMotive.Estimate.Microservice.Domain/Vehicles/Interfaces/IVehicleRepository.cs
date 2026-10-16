@@ -38,6 +38,13 @@ namespace GtMotive.Estimate.Microservice.Domain.Vehicles.Interfaces
         Task Update(IVehicle vehicle);
 
         /// <summary>
+        /// Gets a rental by its identifier.
+        /// </summary>
+        /// <param name="rentalId">Rental identifier.</param>
+        /// <returns>The rental, or null if it does not exist.</returns>
+        Task<IRental> GetRentalById(RentalId rentalId);
+
+        /// <summary>
         /// Queues a new rental for persistence.
         /// </summary>
         /// <param name="rental">Rental to add.</param>

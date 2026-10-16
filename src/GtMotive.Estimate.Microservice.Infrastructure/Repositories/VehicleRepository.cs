@@ -100,10 +100,10 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.Repositories
             var documents = available switch
             {
                 true => await _vehicles
-                    .Find(vehicle => !vehicle.Rentals.Any(rental => rental.ReturnDate == null))
+                    .Find(vehicle => vehicle.ActiveRentalId == null)
                     .ToListAsync(),
                 false => await _vehicles
-                    .Find(vehicle => vehicle.Rentals.Any(rental => rental.ReturnDate == null))
+                    .Find(vehicle => vehicle.ActiveRentalId != null)
                     .ToListAsync(),
                 _ => await _vehicles
                     .Find(FilterDefinition<VehicleDocument>.Empty)
@@ -130,6 +130,30 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.Repositories
             _toUpdate.Add(vehicle);
 
             return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Gets a rental by its identifier.
+        /// </summary>
+        /// <param name="rentalId">Rental identifier.</param>
+        /// <returns>The rental, or null if it does not exist.</returns>
+        public async Task<IRental> GetRentalById(RentalId rentalId)
+        {
+            var document = await _rentals
+                .Find(rental => rental.Id == rentalId.ToGuid())
+                .FirstOrDefaultAsync();
+
+            if (document is null)
+            {
+                return null;
+            }
+
+            return new RentalEntity(
+                new RentalId(document.Id),
+                new VehicleId(document.VehicleId),
+                new Client(document.Client),
+                document.RentDate,
+                document.ReturnDate);
         }
 
         /// <summary>
@@ -266,7 +290,7 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.Repositories
                 Make = vehicle.Make.Value,
                 Model = vehicle.Model.Value,
                 ManufactureDate = vehicle.ManufactureDate.Value,
-                Rentals = [.. vehicle.Rentals.GetRentals().Select(MapToDocument)],
+                ActiveRentalId = vehicle.ActiveRentalId?.ToGuid(),
                 Version = version,
             };
         }
@@ -285,22 +309,13 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.Repositories
 
         private static VehicleEntity MapToEntity(VehicleDocument document)
         {
-            var rentals = document.Rentals
-                .Select(rental => new RentalEntity(
-                    new RentalId(rental.Id),
-                    new VehicleId(rental.VehicleId),
-                    new Client(rental.Client),
-                    rental.RentDate,
-                    rental.ReturnDate))
-                .ToList();
-
             return new VehicleEntity(
                 new VehicleId(document.Id),
                 new Plate(document.Plate),
                 new Make(document.Make),
                 new Model(document.Model),
                 new ManufactureDate(document.ManufactureDate),
-                rentals);
+                document.ActiveRentalId is { } activeRentalId ? new RentalId(activeRentalId) : null);
         }
 
         private async Task<int> SaveChangesCoreAsync()

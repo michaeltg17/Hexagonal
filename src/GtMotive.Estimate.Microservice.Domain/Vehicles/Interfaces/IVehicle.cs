@@ -34,9 +34,9 @@ namespace GtMotive.Estimate.Microservice.Domain.Vehicles.Interfaces
         ManufactureDate ManufactureDate { get; }
 
         /// <summary>
-        /// Gets the rentals of the vehicle.
+        /// Gets the identifier of the active rental, if the vehicle is rented.
         /// </summary>
-        RentalCollection Rentals { get; }
+        RentalId? ActiveRentalId { get; }
 
         /// <summary>
         /// Gets a value indicating whether the vehicle is available.
@@ -55,8 +55,9 @@ namespace GtMotive.Estimate.Microservice.Domain.Vehicles.Interfaces
         /// <summary>
         /// Returns the active rental of the vehicle.
         /// </summary>
+        /// <param name="activeRental">The active rental of the vehicle.</param>
         /// <param name="returnDate">Return date.</param>
         /// <returns>The returned rental.</returns>
-        IRental Return(DateTime returnDate);
+        IRental Return(IRental activeRental, DateTime returnDate);
     }
 }
